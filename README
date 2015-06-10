@@ -1,0 +1,66 @@
+Parser-Generator
+
+
+This is a generator for language parsers written in C and supporting LR(1) context-free grammars written in a simplified Backus–Naur form. By providing an input grammar, the program generates the corresponding GOTO and ACTION tables for either a canonical LR(1) parser or a reduced SLR(1) parser. The algorithm used is based on the original definition by Donald Knuth and implemented from the first edition dragon book, Compilers: Principles, Techniques and Tools. Performance is so-so, with LR(1) tables taking especially long to generate and being a potentially error prone process. It is important to ensure that the grammar is both in LR(1) form rather than LR(k) and also that it is deterministic, otherwise their may be conflicts in the parse tables that the generator has resolved. In general, conflicts are resolved in the order of rules in the grammar. 
+
+As an example, a grammar is provided for the "duck" programming language in grammar.txt.
+
+An example program for the generated parser to operate on is provided in program.txt.
+
+The parser-generator is provided with a lexer that makes some basic assumptions about the format of a program's source. The parser itself also operates on some assumptions. First of all, the parser and lexer both deal with ASCII character sets. The lexer assumes that whitespace takes the form of ' ', '\t', '\r', '\n', so some sequence of spaces, tabs, line returns, and new lines. Glyphs are defined as non-whitespace characters that are neither letters or numbers. Comments, which are discarded during lexing, are either single line '//' C-style comments, C-style block comments '/* ... */' which must terminated at the first occurrence of the end comment mark, and any macro usage by the '#' pound sign, which results in the rest of the line being thrown away.
+
+The lexer preserves data about line-numbers. So, a program that operates on source-code can provide information about line numbers to the user. Newlines are optionally included as information in the lexing, although whitespace and newlines are condensed, so at most one newline token is generated for a sequence of line breaks. In general, information about whitespace is not preserved, and whitespace is only used to differentiate tokens.
+
+Identifiers begin with a character from the alphabet and contain any sequence of one or more alphanumeric characters including the use of the underscore '_'. This definition can easily be changed to suit a programming language or parser's needs. Integers and floating-point numbers are two other cases of literals that are handled, where integers are a sequence of decimal digits and floating point numbers are decimal digits including a '.' decimal point.
+
+Strings can begin with either """ double or "'" single quotations and end when the matching quotation mark is found. Allowing escape characters using backslash "\" was intended but support is inconsistent and it is generally not supported.
+
+Finally, token literals are defined by any uninterrupted sequence of symbols or glyphs. While scanning through a sequence, tokens are picked from the token literal table as they are found. The lexer provides rudimentary errors when it encounters sequences that it does not recognize.
+
+The parser generator can operate in two separate modes depending on the defined constant in "lr_parser.h". If _LR1 is defined, then it will operate to generate canonical LR(1) parse tables. If instead _SLR is defined, it will operate to generate simplified SLR parse tables, which are generally smaller and take less time to generate. 
+
+The grammar format supported is as follows:
+
+A maximum of 256 rules is supported (the number can be modified in lr_parser.h) separated by newlines in a context free grammar (CFG) file.
+
+Empty lines or lines beginning with a semicolon ';' are discarded or ignored.
+
+A grammar rule's left-hand side must begin with a non-terminal symbol.
+
+A non-terminal symbol is represented in-between angled braces '<' and '>' by a unique name. For example, '<expression>' marks a non-terminal symbol.
+
+The first non-terminal symbol encountered by the parser is interpreted to be the 'root' symbol, or the highest level production to generate when parsing a source.
+
+Grammar rules may contain a right-hand side of at least one and up to 24 terminal symbols, non-terminal symbols, tokens, literals, or expressions.
+
+A grammar rule begins with a left-hand side non-terminal symbol, contains the demarker '::=', followed by the right-hand side syntax.
+
+The parser generator has in built symbols for <epsilon>, <$>, <endl>, <integer>, <float>, <string>, and <identifier>:
+
+<epsilon> denotes an empty or nullable non-terminal symbol.
+
+<$> denotes the end of file and is not generally used by a grammar but is an internal symbol used by the parser.
+
+<endl> denotes a newline token.
+
+<integer> denotes an integer expression as found by the lexer.
+
+<float> denotes a floating-point expression as found by the lexer.
+
+<string> denotes a string expression as found by the lexer.
+
+And <identifier> denotes an identifier expression found by the lexer.
+
+Nullable non-terminals are allowed in the context free grammar, meaning there may be a non-terminal symbol used that reduces to <epsilon> and may or may not also reduce to expressions that contain productions that reduce to terminal symbols. There are special concerns when dealing with grammars, especially in the order of production rules and the form that they follow. There may be multiple context-free grammars that match the same language, while an LR(1) parser may be designed to accept a specifically arranged grammar. Keep this in mind, as there should always be a working grammar that generates a valid parse table without conflicts for any given deterministic context free grammar.
+
+Finally, the parser itself, located in "parser.c", implements a stack-based, bottom-up parser. Using the GOTO and ACTION tables, the parser repeatedly pushes input tokens and parse states onto the stack until it finds a production or state that it can shift or reduce. If the parser is able to successfully generate an abstract syntax tree, it is said to accept the input source. 
+
+It is possible to test an input to see whether it parses and also, if it is not able to be parsed, whether it contains a syntax error or if the input stream has been cut-off. This can be useful for designing an interactive interpreter for a language.
+
+Error reporting by the parser is rudimentary and very limited, however it can provide the terminal or non-terminal symbol which interrupted parsing and the line number can be provided. Increasing the depth of error output is something to be improved in the future.
+
+The program should be compilable and runnable on any C compiler and computer. Although there are no guarantees that the source code is completely ANSI compliant. There are also several small memory leaks in the generator itself, but these do not affect parse table generation. It should also be noted that the resources required to generate compliant LR(1) parse tables for any sufficiently complicated grammar are very high. For this reason, it is recommended to use the SLR algorithm.
+
+Thanks.
+
+Greg Tourville
