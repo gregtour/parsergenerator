@@ -4,6 +4,7 @@
 
 
 // table indices
+/*
 ACTION ActionTable(LR_TABLE table, int state, int token)
 {
     ACTION action;
@@ -35,7 +36,7 @@ int GotoTable(LR_TABLE table, int state, int symbol)
     }
 
     return nextState;
-}
+}*/
 
 /* static data */
 
@@ -411,7 +412,9 @@ SYNTAX_TREE* ParseSource(L_TOKEN*      input,
     
     // free the stack
     while (gParseStack)
-        StackPop();
+	{
+        PARSE_STACK pop = StackPop();
+	}
 
     // no errors
     return ast;

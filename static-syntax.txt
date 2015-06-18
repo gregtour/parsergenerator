@@ -1,0 +1,69 @@
+<program> ::= <gstmt*>
+<gstmt*> ::= <gstmt> <gstmt*>
+<gstmt*> ::= <epsilon>
+<gstmt> ::= include <string-list> ;
+<string-list> ::= <string> , <string-list>
+<string-list> ::= <string>
+<gstmt> ::= <type-declaration> ;
+<type-declaration> ::= <identifier> , <type-declaration>
+<type-declaration> ::= <identifier> : <type>
+<gstmt> ::= <identifier> : <type> <block>
+<gstmt> ::= <identifier> ( <param*> ) : <type> <block>
+<param*> ::= <identifier> : <type>
+<param*> ::= <identifier> : <type> , <param*>
+<param*> ::= <epsilon>
+<block> ::= <fstmt>
+<block> ::= { <fstmt*> }
+<type> ::= int
+<type> ::= string
+<type> ::= int [ ]
+<type> ::= void
+<fstmt*> ::= <fstmt> <fstmt*>
+<fstmt*> ::= <epsilon>
+<fstmt> ::= <type-declaration> ;
+<fstmt> ::= <identifier> = <expr> ;
+<fstmt> ::= <identifier> [ <expr> ] = <expr> ;
+<fstmt> ::= <expr> ;
+<fstmt> ::= if ( <expr> ) <block> <else>
+<else> ::= else <block>
+<else> ::= <epsilon>
+<fstmt> ::= while ( <expr> ) <block>
+<fstmt> ::= return ;
+<fstmt> ::= break ;
+<fstmt> ::= continue ; 
+<fstmt> ::= return <expr> ;
+<arg*> ::= <expr>
+<arg*> ::= <expr> , <arg*>
+<arg*> ::= <epsilon>
+<expr> ::= <condition>
+<condition> ::= <condition> and <logic>
+<condition> ::= <condition> or <logic>
+<condition> ::= <logic>
+<logic> ::= not <comparison>
+<logic> ::= <comparison>
+<comparison> ::= <comparison> == <arithmetic>
+<comparison> ::= <comparison> != <arithmetic>
+<comparison> ::= <comparison> \< <arithmetic>
+<comparison> ::= <comparison> > <arithmetic>
+<comparison> ::= <comparison> \<= <arithmetic>
+<comparison> ::= <comparison> >= <arithmetic>
+<comparison> ::= <arithmetic>
+<arithmetic> ::= <arithmetic> + <term>
+<arithmetic> ::= <arithmetic> - <term>
+<arithmetic> ::= <term>
+<term> ::= <term> * <factor>
+<term> ::= <term> / <factor>
+<term> ::= <term> mod <factor>
+<term> ::= <factor>
+<factor> ::= -<factor>
+<factor> ::= !<factor>
+<factor> ::= <final>
+<final> ::= ( <expr> )
+<final> ::= <identifier>
+<final> ::= <identifier> [ <expr> ]
+<final> ::= <identifier> ( <arg*> )
+<final> ::= <integer>
+<final> ::= <string>
+<final> ::= <boolean>
+<boolean> ::= true
+<boolean> ::= false

@@ -1,0 +1,57 @@
+x: int;
+y: int;
+
+combination(m:int,n:int):int{return factorial(m)/factorial(n)/factorial(m-n);}
+combination(m: int, n: int): int return factorial(m) / factorial(n) / factorial(m-n);
+
+a,b,c : string;
+
+x :int[];
+y :int[ ];
+
+factorial(count : int) : int
+{
+ if (count > 1) {
+  return (count * factorial(count-1));
+ } if (count >= 0) {
+  return 1;
+ } 
+  return -1;
+ 
+}
+
+# root level source
+variable1 : int;
+variable2 : int;
+variable4 : string;
+my_array_type : int [];
+
+include "source2.xs";
+
+main() : void { return; }
+
+functionX(arg1 : int, arg2 : int[]) : int 
+{
+ variable2 = 3;
+ variable4 = "a constant string";
+
+ q : int;
+ q = variable1 + variable2;
+ v2 : int;
+ variable1 = 1;
+
+ my_array_type = malloc(7);
+ /*my_array_type[0] = 0;
+ my_array_type[1] = 0;
+ my_array_type[2] = 0;
+ my_array_type[3] = 0;*/
+ // ...
+//}//
+ if (arg1 > 2)
+ {
+  printf("arg1 is greater than 2\n");
+  break;
+ }
+ return 7;
+}
+

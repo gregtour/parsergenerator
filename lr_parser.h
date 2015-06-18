@@ -16,14 +16,14 @@ typedef unsigned long u32;
 /* ************************************************************************** */
 
 // constant constraints for language spec
-//#define _LR1
-#define _SLR
+#define _LR1
+//#define _SLR
 
-#define LEX_NEWLINES
+//#define LEX_NEWLINES
 #define CASE_SENSITIVE
 #define CASE_SENSITIVE_KEYWORDS
 #define IGNORE_MACROS
-#define SEMICOLON_COMMENTS
+//#define SEMICOLON_COMMENTS
 #define SYMBOL_BUFFER_SIZE  4096
 #define TOKEN_BUFFER_SIZE   4096
 #define MAX_RULES           256

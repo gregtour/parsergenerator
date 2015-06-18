@@ -143,7 +143,7 @@ int IsNullable(int symbol)
 // Find the nullable nonterminal symbols
 void FindNullableNonterminals(GRAMMAR_TABLE* G)
 {
-    NULLABLE_NONTERMINALS = malloc(G->numSymbols * sizeof(int));
+    NULLABLE_NONTERMINALS = (int*)malloc(G->numSymbols * sizeof(int));
     RULE rule;
     int  changing;
     int  i, p, r;
@@ -201,7 +201,7 @@ void BuildFirstSets(GRAMMAR_TABLE* G)
     int symbol, i, p, r;
     RULE rule;
 
-    FIRST_SETS = malloc(sizeof(int) * G->numTokens * G->numSymbols);
+    FIRST_SETS = (int*)malloc(sizeof(int) * G->numTokens * G->numSymbols);
     
     // clear first map
     for (i = 0; i < G->numTokens * G->numSymbols; i++)
@@ -269,7 +269,7 @@ void BuildFollowSets(GRAMMAR_TABLE* G)
     int  finished;
     int  i, j, p, r;
 
-    FOLLOW_SETS = malloc(sizeof(int) * G->numTokens * G->numSymbols);
+    FOLLOW_SETS = (int*)malloc(sizeof(int) * G->numTokens * G->numSymbols);
 
     // clear follow map
     for (i = 0; i < G->numTokens * G->numSymbols; i++)
@@ -390,7 +390,7 @@ LR_ITEM_SET* Sort(LR_ITEM_SET* I)
     }
     
     // allocate heap [O(1)]
-    heap = malloc(sizeof(LR_ITEM) * size);
+    heap = (LR_ITEM*)malloc(sizeof(LR_ITEM) * size);
     
     // add items to the heap [O(N log N)]
     for (itr = I, i = 0; itr; itr = itr->next, i++)
@@ -459,7 +459,7 @@ LR_ITEM_SET* CopyItemSet(LR_ITEM_SET* I)
 {
     LR_ITEM_SET* J = NULL;
     while (I) {
-        LR_ITEM_SET* copy = malloc(sizeof(LR_ITEM_SET));
+        LR_ITEM_SET* copy = (LR_ITEM_SET*)malloc(sizeof(LR_ITEM_SET));
         copy->item = I->item;
         copy->next = J;
         J = copy;
@@ -545,7 +545,7 @@ LR_ITEM_SET* Closure(LR_ITEM_SET* I, GRAMMAR_TABLE* G)
                                 if (find == NULL)
                                 {
                                     // add [Z -> *y, b] to J;
-                                    find = malloc(sizeof(LR_ITEM_SET));
+                                    find = (LR_ITEM_SET*)malloc(sizeof(LR_ITEM_SET));
                                     find->item = add;
                                     find->next = J;
                                     J = find;
@@ -586,7 +586,7 @@ LR_ITEM_SET* Goto(LR_ITEM_SET* I, int X, GRAMMAR_TABLE* G)
         if (B == X)
         {
             // add A -> aX*b to J
-            LR_ITEM_SET* add = malloc(sizeof(LR_ITEM_SET));
+            LR_ITEM_SET* add = (LR_ITEM_SET*)malloc(sizeof(LR_ITEM_SET));
             add->item = item;
             add->item.dot++;
             add->next = J;
@@ -628,8 +628,8 @@ end
 LR_ITEM_COLLECTION* CanonicalCollection(GRAMMAR_TABLE* G)
 {
     // C := {closure({[S' -> *S, $]})};
-    LR_ITEM_COLLECTION* C = malloc(sizeof(LR_ITEM_COLLECTION));
-    C->set = malloc(sizeof(LR_ITEM_SET));
+    LR_ITEM_COLLECTION* C = (LR_ITEM_COLLECTION*)malloc(sizeof(LR_ITEM_COLLECTION));
+    C->set = (LR_ITEM_SET*)malloc(sizeof(LR_ITEM_SET));
     C->set->item.production = 0;
     C->set->item.dot = 0;
     C->set->item.lookahead = gSymbolEOF;
@@ -675,7 +675,7 @@ LR_ITEM_COLLECTION* CanonicalCollection(GRAMMAR_TABLE* G)
                     else if (find->next == NULL)
                     {
                         // add goto(I, X) to C
-                        find->next = malloc(sizeof(LR_ITEM_COLLECTION));
+                        find->next = (LR_ITEM_COLLECTION*)malloc(sizeof(LR_ITEM_COLLECTION));
                         find = find->next;
                         find->next = NULL;
                         find->set = gotoSet;
@@ -759,10 +759,8 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
     table.numTokens = G->numTokens;
     table.numSymbols = G->numSymbols;
     table.numStates = numStates;
-    table.actionTable = malloc(table.numStates * table.numTokens
-        * sizeof(ACTION));
-    table.gotoTable = malloc(table.numStates * table.numSymbols
-        * sizeof(int));
+    table.actionTable = (ACTION*)malloc(table.numStates * table.numTokens * sizeof(ACTION));
+    table.gotoTable = (int*)malloc(table.numStates * table.numSymbols * sizeof(int));
 
     // clear the tables
     memset(table.actionTable, 0, table.numStates * table.numTokens

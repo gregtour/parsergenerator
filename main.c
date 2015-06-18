@@ -3,8 +3,6 @@
 #define malloc malloc
 #include <stdlib.h>
 #include "lr_parser.h"
-//#include "generated_parser.h"
-//#include "java_parser.h"
 
 // memory tracker
 #ifdef _MEM_TRACKING
@@ -174,12 +172,13 @@ int TestParser(const char* language,
     FreeGrammarTable(&grammar);
     FreeLRParser(&parser);
     FreeLexing(lexing, buffer);
-    FreeParseTree(ast);
+    //FreeParseTree(ast);
     PrintMemoryUsage();
     getchar();
     return 0;
 }
 
+void ReduceProgramAST(SYNTAX_TREE** program);
 int GenerateParserAndTest(const char* language, 
                           const char* program, 
                           const char* output)
@@ -225,6 +224,7 @@ int GenerateParserAndTest(const char* language,
         return 3;
     }
 
+	getchar();
 // ////////////////////////////////
 
     // lex source
@@ -253,6 +253,7 @@ int GenerateParserAndTest(const char* language,
         PrintMemoryUsage();
         return 4;
     }
+	ReduceProgramAST(&ast);
     PrintParseTree(ast, grammar);
 
     printf("Success.\n");
@@ -273,19 +274,56 @@ int GenerateParserAndTest(const char* language,
     return 0;
 }
 
+void ReduceProgramAST(SYNTAX_TREE** program)
+{
+    const unsigned int empty_production = 0xFF;
+    
+	//unsigned int child0_productions[] = { 35, 38, 40, 47, 50, 54, 57, 62 };
+	unsigned int reducibleTokens[] = { 0x100A, 0x100D, 0x100E, 0x100F, 0x1010, 0x1011, 0x1012 };
+    unsigned int i; 
+    unsigned int reducible = 1;
+    // continue while reducible
+    while (reducible)
+    {
+        reducible = 0;
+
+        /* productions that reduce to node->children[0] */
+        /* 35, 38, 40, 47, 50, 54, 57 */
+        //for (i = 0; i < sizeof(child0_productions)/sizeof(int); i++)
+		for (i = 0; i < sizeof(reducibleTokens)/sizeof(int); i++)
+        {
+            if ((*program)->token == reducibleTokens[i] &&
+				(*program)->numChildren == 1)
+            {
+                SYNTAX_TREE* cur = *program;
+                unsigned int child;
+
+                for (child = 1; child < cur->numChildren; child++)
+                {
+                    FreeParseTree(cur->children[child]);
+                }
+
+                *program = (*program)->children[0];
+                free(cur->children);
+                free(cur);
+                reducible = 1;
+            }
+        }
+    }
+
+    // apply for all sub-trees
+    for (i = 0; i < (*program)->numChildren; i++)
+    {
+        ReduceProgramAST(&(*program)->children[i]);
+    }
+}
+
 // compiler frontend
 int main(int argc, char** argv)
 {
     int           error;
 
-    //if (argc < 2) {
-    //    printf("./lrparser grammar [-o output] [-t test]");
-    //}
-    
-    //TestParser("grammar.txt", "test.duck");
-    //ParserGenerator("grammar.txt", "output/duck");
-    GenerateParserAndTest("grammar.txt", "test.duck", "output/duck");
+    GenerateParserAndTest("static-syntax.txt", "static-test.txt", "output/strongly_typed");
     getchar();
     return 0;
 }
-
