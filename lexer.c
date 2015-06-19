@@ -98,7 +98,7 @@ L_TOKEN* FLOAT(char* source,
     block->line = line;
     block->next = 0;
 
-	return block;
+    return block;
 }
 
 L_TOKEN* STRING(char*         source,

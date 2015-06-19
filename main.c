@@ -224,7 +224,7 @@ int GenerateParserAndTest(const char* language,
         return 3;
     }
 
-	getchar();
+    getchar();
 // ////////////////////////////////
 
     // lex source
@@ -253,7 +253,7 @@ int GenerateParserAndTest(const char* language,
         PrintMemoryUsage();
         return 4;
     }
-	ReduceProgramAST(&ast);
+    ReduceProgramAST(&ast);
     PrintParseTree(ast, grammar);
 
     printf("Success.\n");
@@ -278,8 +278,8 @@ void ReduceProgramAST(SYNTAX_TREE** program)
 {
     const unsigned int empty_production = 0xFF;
     
-	//unsigned int child0_productions[] = { 35, 38, 40, 47, 50, 54, 57, 62 };
-	unsigned int reducibleTokens[] = { 0x100A, 0x100D, 0x100E, 0x100F, 0x1010, 0x1011, 0x1012 };
+    //unsigned int child0_productions[] = { 35, 38, 40, 47, 50, 54, 57, 62 };
+    unsigned int reducibleTokens[] = { 0x100A, 0x100D, 0x100E, 0x100F, 0x1010, 0x1011, 0x1012 };
     unsigned int i; 
     unsigned int reducible = 1;
     // continue while reducible
@@ -290,10 +290,10 @@ void ReduceProgramAST(SYNTAX_TREE** program)
         /* productions that reduce to node->children[0] */
         /* 35, 38, 40, 47, 50, 54, 57 */
         //for (i = 0; i < sizeof(child0_productions)/sizeof(int); i++)
-		for (i = 0; i < sizeof(reducibleTokens)/sizeof(int); i++)
+        for (i = 0; i < sizeof(reducibleTokens)/sizeof(int); i++)
         {
             if ((*program)->token == reducibleTokens[i] &&
-				(*program)->numChildren == 1)
+                (*program)->numChildren == 1)
             {
                 SYNTAX_TREE* cur = *program;
                 unsigned int child;

@@ -160,7 +160,7 @@ typedef struct SYNTAX_TREE
     int         production;
     const char* string;
     int         length;
-	int         line;
+    int         line;
     // compiler information
     struct AST_TAG *tag;
     // child nodes

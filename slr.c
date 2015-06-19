@@ -190,7 +190,7 @@ void FindNullableNonterminals(GRAMMAR_TABLE* G)
                         changing = 1;
                     }
                 }
-			}
+            }
         }
     } while (changing);
 }

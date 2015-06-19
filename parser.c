@@ -412,9 +412,9 @@ SYNTAX_TREE* ParseSource(L_TOKEN*      input,
     
     // free the stack
     while (gParseStack)
-	{
+    {
         PARSE_STACK pop = StackPop();
-	}
+    }
 
     // no errors
     return ast;
