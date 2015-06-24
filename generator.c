@@ -809,6 +809,8 @@ void DecompressActionTable(int* source_data, ACTION* dest_data, unsigned int com
 /* save the binary data of an lr1/slr parse table to a header file (compressed) */
 void SaveParserCompressed(FILE* file, LR_TABLE parser, unsigned int bExtern)
 {
+    unsigned int gotoSize;
+    unsigned int actionSize;
     unsigned int i;
     
     // goto table
@@ -821,7 +823,7 @@ void SaveParserCompressed(FILE* file, LR_TABLE parser, unsigned int bExtern)
 
     /* calculate size */
 
-    unsigned int gotoSize = CompressedSize(parser.gotoTable, parser.numStates * parser.numSymbols);
+   gotoSize = CompressedSize(parser.gotoTable, parser.numStates * parser.numSymbols);
 
     /* output */
     if (bExtern == 0) { fprintf(file, "extern "); }
@@ -852,7 +854,7 @@ void SaveParserCompressed(FILE* file, LR_TABLE parser, unsigned int bExtern)
     fprintf(file, "/* LR(1) ACTION table */\n");
 #endif
 
-    unsigned int actionSize = CompressedActionTableSize(parser.actionTable, parser.numStates * parser.numTokens);
+    actionSize = CompressedActionTableSize(parser.actionTable, parser.numStates * parser.numTokens);
 
     if (bExtern == 0) { fprintf(file, "extern "); };
     fprintf(file, "int COMPRESSED_ACTION_TABLE[%i]", actionSize);

@@ -276,7 +276,9 @@ void PrintLRParser(LR_TABLE      parser,
                    GRAMMAR_TABLE grammar);
 
 /* PARSER.C */
-
+int ParseSucceeds(L_TOKEN* input, 
+                  LR_TABLE parser, 
+                  GRAMMAR_TABLE grammar);
 SYNTAX_TREE* ParseSource(L_TOKEN*      input,
                          LR_TABLE      parser,
                          GRAMMAR_TABLE grammar);

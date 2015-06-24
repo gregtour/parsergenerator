@@ -58,9 +58,10 @@ int SetFirstTable(int symbol, int token, int value, GRAMMAR_TABLE* G)
         && symbol <= G->numSymbols
         && token != (gSymbolEpsilon ^ K_TOKEN))
     {
+		int index;
         symbol--;
         token--;
-        int index = symbol*G->numTokens + token;
+        index = symbol*G->numTokens + token;
         if (FIRST_SETS[index] != value)
         {
             FIRST_SETS[index] = value;
@@ -100,9 +101,10 @@ int SetFollowTable(int symbol, int token, int value, GRAMMAR_TABLE* G)
         && symbol <= G->numSymbols
         && token != (gSymbolEpsilon ^ K_TOKEN))
     {
+		int index;
         symbol--;
         token--;
-        int index = symbol*G->numTokens + token;
+        index = symbol*G->numTokens + token;
         if (FOLLOW_SETS[index] != value)
         {
             FOLLOW_SETS[index] = value;
@@ -144,9 +146,10 @@ int IsNullable(int symbol)
 // Find the nullable nonterminal symbols
 void FindNullableNonterminals(GRAMMAR_TABLE* G)
 {
-    NULLABLE_NONTERMINALS = (int*)malloc(G->numSymbols * sizeof(int));
     int  changing;
     int  i, p, r;
+
+    NULLABLE_NONTERMINALS = (int*)malloc(G->numSymbols * sizeof(int));
     
     // clear the set
     for (i = 0; i < G->numSymbols; i++)
@@ -197,6 +200,7 @@ void FindNullableNonterminals(GRAMMAR_TABLE* G)
 // construct FIRST sets
 void BuildFirstSets(GRAMMAR_TABLE* G)
 {
+    int changing;
     int symbol, i, p, r;
 
     FIRST_SETS = (int*)malloc(sizeof(int) * G->numTokens * G->numSymbols);
@@ -215,7 +219,6 @@ void BuildFirstSets(GRAMMAR_TABLE* G)
     }
     
     // join first sets from production rules while they continue to change
-    int changing;
     do {
         changing = 0;
         for (p = 0; p < G->numRules; p++)
@@ -264,6 +267,7 @@ void BuildFirstSets(GRAMMAR_TABLE* G)
 void BuildFollowSets(GRAMMAR_TABLE* G)
 {
     RULE rule;
+    int changing;
     int  i, j, p, r;
 
     FOLLOW_SETS = (int*)malloc(sizeof(int) * G->numTokens * G->numSymbols);
@@ -276,13 +280,13 @@ void BuildFollowSets(GRAMMAR_TABLE* G)
     SetFollowTable(gSymbolGoal, gSymbolEOF, 1, G);
 
     // go through productions and construct follow sets for the rhs
-    int changing;
     do {
         changing = 0;
         for (p = 0; p < G->numRules; p++)
         {
+            int left;
             rule = G->rules[p];
-            int left = rule.lhs;
+            left = rule.lhs;
             // compute follow for all of the rhs terms
             for (r = 0; r < rule.rhsLength; r++)
             {
@@ -389,8 +393,8 @@ LR_ITEM_SET* Sort(LR_ITEM_SET* I)
     // add items to the heap [O(N log N)]
     for (itr = I, i = 0; itr; itr = itr->next, i++)
     {
-        heap[i] = itr->item;
         int a = i; int b = (i-1)/2;
+        heap[i] = itr->item;
         while (a > 0 && CompareItems(heap[a], heap[b]) < 0)
         {
             SWAP_ITEMS(&heap[a], &heap[b]);
@@ -402,12 +406,13 @@ LR_ITEM_SET* Sort(LR_ITEM_SET* I)
     // pop items off the heap [O(N log N)]
     for (itr = I; itr; itr = itr->next)
     {
+        int j = 0;
+        int a = 1; int b = 2;
+
         itr->item = heap[0];
         size--;
         heap[0] = heap[size];
         
-        int j = 0;
-        int a = 1; int b = 2;
         while (j < size &&
                ((a < size && CompareItems(heap[j], heap[a]) > 0)
              || (b < size && CompareItems(heap[j], heap[b]) > 0)))
@@ -493,10 +498,10 @@ LR_ITEM_SET* Closure(LR_ITEM_SET* I, GRAMMAR_TABLE* G)
     // repeat
     int stillAdding;
     do {
+        LR_ITEM_SET* itr;
         stillAdding = 0;
         
         // for each item A-> a*Bb in J
-        LR_ITEM_SET* itr;
         for (itr = J; itr; itr = itr->next)
         {
             LR_ITEM item = itr->item;
@@ -511,14 +516,16 @@ LR_ITEM_SET* Closure(LR_ITEM_SET* I, GRAMMAR_TABLE* G)
                     {
                         // such that B -> *y is not in J
                         LR_ITEM add;
+                        LR_ITEM_SET* find;
                         add.production = i;
                         add.dot = 0;
 
-                        LR_ITEM_SET* find;
                         for (find = J; find; find = find->next)
                         {
                             if (CompareItems(find->item, add) == 0)
+                            {
                                 break;
+                            }
                         }
 
                         if (find == NULL)
@@ -554,6 +561,7 @@ LR_ITEM_SET* Goto(LR_ITEM_SET* I, int X, GRAMMAR_TABLE* G)
 {
     // J := {};
     LR_ITEM_SET* J = NULL;
+    LR_ITEM_SET* K = NULL;
     
     // for each item A -> a*Xb in I
     LR_ITEM_SET* itr;
@@ -573,7 +581,7 @@ LR_ITEM_SET* Goto(LR_ITEM_SET* I, int X, GRAMMAR_TABLE* G)
     }
     
     // return closure(J)
-    LR_ITEM_SET* K = Closure(J, G);
+    K = Closure(J, G);
     FreeItemSet(J);
     return K;
 }
@@ -606,23 +614,25 @@ end
 LR_ITEM_COLLECTION* CanonicalCollection(GRAMMAR_TABLE* G)
 {
     // C := {closure({[S' -> *S]})};
+    int finished;    
+    LR_ITEM_SET* closure;
     LR_ITEM_COLLECTION* C = (LR_ITEM_COLLECTION*)malloc(sizeof(LR_ITEM_COLLECTION));
+
     C->set = (LR_ITEM_SET*)malloc(sizeof(LR_ITEM_SET));
     C->set->item.production = 0;
     C->set->item.dot = 0;
     C->set->next = NULL;
     C->next = NULL;
     
-    LR_ITEM_SET* closure = Closure(C->set, G);
+    closure = Closure(C->set, G);
     FreeItemSet(C->set);
     C->set = closure;
     
     // repeat
-    int finished;
     do {
+        LR_ITEM_COLLECTION* itr;
         finished = 1;
         // for each set of items I in C
-        LR_ITEM_COLLECTION* itr;
         for (itr = C; itr; itr = itr->next)
         {
             LR_ITEM_SET* I = itr->set;
@@ -630,6 +640,8 @@ LR_ITEM_COLLECTION* CanonicalCollection(GRAMMAR_TABLE* G)
             int i;
             for (i = 0; i < G->numSymbols + G->numTokens; i++)
             {
+                LR_ITEM_COLLECTION* find;
+
                 int X = (i < G->numSymbols) ? K_SYMBOL + i + 1 :
                     K_TOKEN + (i - G->numSymbols) + 1;
                     
@@ -639,7 +651,6 @@ LR_ITEM_COLLECTION* CanonicalCollection(GRAMMAR_TABLE* G)
                 if (gotoSet == NULL) continue;
 
                 // and not in C
-                LR_ITEM_COLLECTION* find;
                 for (find = C; find; find = find->next)
                 {
                     if (CompareItemSets(find->set, gotoSet) == 0)
@@ -715,6 +726,9 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
     int numStates = 0;
     int state;
 
+    int reduceReduceConflicts = 0;
+    int shiftReduceConflicts = 0;
+
     // count the number of states
     for (itr = C; itr; itr = itr->next)
         numStates++;
@@ -748,9 +762,6 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
             FreeItemSet(gotoSet);
         }
     }
-    
-    int reduceReduceConflicts = 0;
-    int shiftReduceConflicts = 0;
 
     // for each item collection in a parser state
     for (itr = C, state = 0; itr; itr = itr->next, state++)
@@ -880,11 +891,11 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
             // for the input $
             if (items->item.production == 0 && dot == 1)
             {
+                int index = state * table.numTokens
+                    + (gSymbolEOF ^ K_TOKEN) - 1;
                 action.type = ACTION_ACCEPT;
                 action.value = 0;
                 
-                int index = state * table.numTokens
-                    + (gSymbolEOF ^ K_TOKEN) - 1;
                 if (table.actionTable[index].type != ACTION_ERROR &&
                     (table.actionTable[index].type != action.type ||
                      table.actionTable[index].value != action.value))
@@ -971,8 +982,8 @@ void PrintParseTable(LR_TABLE      parser,
     
     for (i = 1; i <= parser.numTokens; i++)
     {
-        printf("\t");
         char* str = GetElement(i | K_TOKEN, grammar);
+        printf("\t");
         j = 0; if (str[j] == '<') j++;
         for (; j < 3 && str[j] != 0
                 && str[j] != '>'; j++)
@@ -981,8 +992,8 @@ void PrintParseTable(LR_TABLE      parser,
     printf("\t|");
     for (i = 1; i <= parser.numSymbols; i++)
     {
-        printf("\t");
         char* str = GetElement(i | K_SYMBOL, grammar);
+        printf("\t");
         j = 0; if (str[j] == '<') j++;
         for (; j < 3 && str[j] != 0
                 && str[j] != '>'; j++)

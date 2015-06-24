@@ -28,7 +28,7 @@ typedef struct MEMTRACK
     int unfreed;
 } MEMTRACK;
 
-const int MAX_COUNT = 5120;
+#define MAX_COUNT   5120
 unsigned int index_m = 0;
 MEMTRACK indices[MAX_COUNT];
 #endif
@@ -59,12 +59,9 @@ void* MallocTrackMemory(size_t size, int lineNumber, const char* sourceFile)
 
 void FreeTrackMemory(void* data)
 {
-    if (data == NULL) return;
-    free(data);
-    gFreeCalls++;
-
 #ifdef ADDRESS_TRACKING
-    for (unsigned int i = 0; i < index_m; i++)
+    unsigned int i;
+    for (i = 0; i < index_m; i++)
     {
         if (indices[i].data == data
             && indices[i].unfreed == 1)
@@ -74,6 +71,10 @@ void FreeTrackMemory(void* data)
         }
     }
 #endif
+
+    if (data == NULL) return;
+    free(data);
+    gFreeCalls++;
 }
 
 #ifndef malloc
@@ -86,6 +87,11 @@ void FreeTrackMemory(void* data)
 
 void PrintMemoryUsage()
 {
+#ifdef ADDRESS_TRACKING
+    unsigned int count = 0;
+    unsigned int i = 0;
+#endif
+
     int b = gTotalMemoryUsage % 1000;
     int kb = (gTotalMemoryUsage / 1000) % 1000;
     int mb = (gTotalMemoryUsage / 1000000) % 1000;
@@ -102,14 +108,13 @@ void PrintMemoryUsage()
     printf("Analyzing unfreed blocks...\n");
 
 #ifdef ADDRESS_TRACKING
-    unsigned int looseBlock = 0;
-    for (unsigned int i = 0; i < index_m; i++)
+    for (i = 0; i < index_m; i++)
     {
         if (indices[i].unfreed)
         {
-            looseBlock++;
+            count++;
             printf("(%i.) Block of %i bytes starting at 0x%p has not been freed. Allocation from %s at line %i.\n", 
-                looseBlock, indices[i].size, indices[i].data, indices[i].sourceFile, indices[i].lineNum);
+                count, indices[i].size, indices[i].data, indices[i].sourceFile, indices[i].lineNum);
         }
     }
 #endif
@@ -262,6 +267,7 @@ int GenerateParserAndTest(const char* language,
     L_TOKEN*      lexing;
     SYNTAX_TREE*  ast;
     char*         buffer;
+    int           result;
     int           error;
 
     printf("\n");
@@ -323,6 +329,10 @@ int GenerateParserAndTest(const char* language,
         return 3;
     }
     PrintLexing(lexing);
+
+
+    result = ParseSucceeds(lexing, parser, grammar);
+    printf("Result: %i\n\n", result);
 
     // parse source
     ast = ParseSource(lexing, parser, grammar);
