@@ -1020,8 +1020,7 @@ void SaveCompiler(FILE*         file,
                   LR_TABLE      parser,
                   GRAMMAR_TABLE grammar)
 {
-    RULE rule;
-    int r, rhs;
+    int r;
 
     fprintf(file, "/* reduce one node */\n");
     fprintf(file, "int ProcessNode(SYNTAX_TREE* node)\n");

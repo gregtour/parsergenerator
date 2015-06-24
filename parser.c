@@ -134,6 +134,20 @@ PARSE_STACK StackPop()
     return r;
 }
 
+void FreeParseStack()
+{
+    PARSE_STACK s;
+    while (gParseStack)
+    {
+        s = StackPop();
+        if (s.type == TOKEN_SYNTAX_TREE)
+        {
+            SYNTAX_TREE* astSection = (SYNTAX_TREE*)s.token;
+            FreeParseTree(astSection);
+        }
+    }
+}
+
 void PrintErrorInput(L_TOKEN* input, GRAMMAR_TABLE g)
 {
     int i;
@@ -384,6 +398,9 @@ SYNTAX_TREE* ParseSource(L_TOKEN*      input,
             {
                 printf("Parse error: expected state on top of stack.\n");
                 PrintErrorInput(ip, grammar);
+
+                FreeParseStack();
+
                 return 0;
             }
             
@@ -406,6 +423,9 @@ SYNTAX_TREE* ParseSource(L_TOKEN*      input,
             // error
             printf("Parse error: illegal action type.\n");
             PrintErrorInput(ip, grammar);
+
+            FreeParseStack();
+
             return 0;
         }
     }
@@ -425,8 +445,7 @@ void FreeParseTree(SYNTAX_TREE* ast)
 {
     if (ast && ast->children)
     {
-        unsigned int i;
-
+        int i;
         for (i = 0; i < ast->numChildren; i++)
         {
             FreeParseTree(ast->children[i]);
@@ -462,9 +481,10 @@ void PrintParseTreeRecurse(SYNTAX_TREE*  ast,
 {
     if (ast->children)
     {
-        unsigned int i;
+		unsigned int u;
+        int i;
 
-        for (i = 0; i < indent*2; i++)
+        for (u = 0; u < indent*2; u++)
         {
             printf(" ");
         }
@@ -501,7 +521,7 @@ void PrintParseTreeFormat(SYNTAX_TREE*  ast,
                           GRAMMAR_TABLE grammar)
 {
     if (ast->numChildren > 0) {
-        unsigned int i;
+        int i;
         for (i = 0; i < ast->numChildren; i++)
             PrintParseTreeFormat(ast->children[i], grammar);
     } else {

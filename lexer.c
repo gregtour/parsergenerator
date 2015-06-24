@@ -219,7 +219,6 @@ L_TOKEN* LexSource(const char*    file,
     int   read;
     int   i, j;
     int   a, b;
-    int   token;
 
     // read source file
     // printf("Loading source file from %s...\n", file);

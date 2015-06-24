@@ -16,8 +16,8 @@ typedef unsigned long u32;
 /* ************************************************************************** */
 
 // constant constraints for language spec
-#define _LR1
-//#define _SLR
+//#define _LR1
+#define _SLR
 
 //#define LEX_NEWLINES
 #define CASE_SENSITIVE
@@ -38,10 +38,16 @@ typedef unsigned long u32;
 #define TOKEN_L_TOKEN       1
 #define TOKEN_SYNTAX_TREE   2
 
-#define _MEM_TRACKING
+//#define _MEM_TRACKING
+//#define ADDRESS_TRACKING
+
 #ifdef _MEM_TRACKING
 #ifndef malloc
+#ifdef ADDRESS_TRACKING
+#define malloc(x)   MallocTrackMemory((x), __LINE__, __FILE__)
+#else
 #define malloc      MallocTrackMemory
+#endif
 #endif
 
 #ifndef free
@@ -174,7 +180,11 @@ typedef struct SYNTAX_TREE
 /* ************************************************************************** */
 
 #ifdef _MEM_TRACKING
+#ifndef ADDRESS_TRACKING
 void* MallocTrackMemory(size_t);
+#else
+void* MallocTrackMemory(size_t, int, const char*);
+#endif
 void  FreeTrackMemory(void*);
 void PrintMemoryUsage();
 #endif

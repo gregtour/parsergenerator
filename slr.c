@@ -145,7 +145,6 @@ int IsNullable(int symbol)
 void FindNullableNonterminals(GRAMMAR_TABLE* G)
 {
     NULLABLE_NONTERMINALS = (int*)malloc(G->numSymbols * sizeof(int));
-    RULE rule;
     int  changing;
     int  i, p, r;
     
@@ -198,9 +197,7 @@ void FindNullableNonterminals(GRAMMAR_TABLE* G)
 // construct FIRST sets
 void BuildFirstSets(GRAMMAR_TABLE* G)
 {
-    int finished;
     int symbol, i, p, r;
-    RULE rule;
 
     FIRST_SETS = (int*)malloc(sizeof(int) * G->numTokens * G->numSymbols);
     
@@ -267,7 +264,6 @@ void BuildFirstSets(GRAMMAR_TABLE* G)
 void BuildFollowSets(GRAMMAR_TABLE* G)
 {
     RULE rule;
-    int  finished;
     int  i, j, p, r;
 
     FOLLOW_SETS = (int*)malloc(sizeof(int) * G->numTokens * G->numSymbols);
@@ -749,6 +745,7 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
             LR_ITEM_SET* gotoSet = Goto(itr->set, x | K_SYMBOL, G);
             int gotoState = GotoState(gotoSet, C);
             table.gotoTable[state * table.numSymbols + x - 1] = gotoState;
+            FreeItemSet(gotoSet);
         }
     }
     
@@ -779,6 +776,7 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
                 gotoSet = Goto(itr->set, production.rhs[dot], G);
                 action.type = ACTION_SHIFT;
                 action.value = GotoState(gotoSet, C);
+                FreeItemSet(gotoSet);
                 
                 index = state * table.numTokens
                     + (production.rhs[dot] ^ K_TOKEN) - 1;

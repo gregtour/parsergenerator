@@ -18,18 +18,62 @@ int gFreeCalls = 0;
 #undef free
 #endif
 
-void* MallocTrackMemory(size_t size)
+#ifdef ADDRESS_TRACKING
+typedef struct MEMTRACK
 {
+    void* data;
+    int lineNum;
+    const char* sourceFile;
+    unsigned int size;
+    int unfreed;
+} MEMTRACK;
+
+const int MAX_COUNT = 5120;
+unsigned int index_m = 0;
+MEMTRACK indices[MAX_COUNT];
+#endif
+
+#ifndef ADDRESS_TRACKING
+void* MallocTrackMemory(size_t size)
+#else
+void* MallocTrackMemory(size_t size, int lineNumber, const char* sourceFile)
+#endif
+{
+    void* data;
     gTotalMemoryUsage += (int)size; // gTotalMemoryUsage + size;
     gMallocCalls++;
-    return malloc(size);
+    data = malloc(size);
+#ifdef ADDRESS_TRACKING
+    if (index_m < MAX_COUNT)
+    {
+        indices[index_m].data = data;
+        indices[index_m].lineNum = lineNumber;
+        indices[index_m].sourceFile = sourceFile;
+        indices[index_m].unfreed = 1;
+        indices[index_m].size = size;
+        index_m++;
+    }
+#endif
+    return data;
 }
 
 void FreeTrackMemory(void* data)
 {
+    if (data == NULL) return;
     free(data);
     gFreeCalls++;
-    return;
+
+#ifdef ADDRESS_TRACKING
+    for (unsigned int i = 0; i < index_m; i++)
+    {
+        if (indices[i].data == data
+            && indices[i].unfreed == 1)
+        {
+            indices[i].unfreed = 0;
+            break;
+        }
+    }
+#endif
 }
 
 #ifndef malloc
@@ -51,9 +95,24 @@ void PrintMemoryUsage()
         printf("Total memory usage: %i.%i kb\n", kb, b);
     }
 
-    printf("%i calls to malloc() with %i calls to free()\n", 
+    printf("%i calls to malloc() with %i calls to free()\n\n", 
         gMallocCalls, 
         gFreeCalls);
+
+    printf("Analyzing unfreed blocks...\n");
+
+#ifdef ADDRESS_TRACKING
+    unsigned int looseBlock = 0;
+    for (unsigned int i = 0; i < index_m; i++)
+    {
+        if (indices[i].unfreed)
+        {
+            looseBlock++;
+            printf("(%i.) Block of %i bytes starting at 0x%p has not been freed. Allocation from %s at line %i.\n", 
+                looseBlock, indices[i].size, indices[i].data, indices[i].sourceFile, indices[i].lineNum);
+        }
+    }
+#endif
 }
 #endif // _MEM_TRACKING
 
@@ -72,7 +131,9 @@ int ParserGenerator(const char* language,
     {
         printf("Error loading context free grammar file\n");
         FreeGrammarTable(&grammar);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 1;
     }
     PrintGrammar(grammar);
@@ -84,7 +145,9 @@ int ParserGenerator(const char* language,
         printf("Error building canonical LR parse tables.\n");
         FreeGrammarTable(&grammar);
         FreeLRParser(&parser);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 2;
     }
     PrintLRParser(parser, grammar);
@@ -101,7 +164,9 @@ int ParserGenerator(const char* language,
     printf("Successfully generated parser!\n");
     FreeGrammarTable(&grammar);
     FreeLRParser(&parser);
+#ifdef _MEM_TRACKING
     PrintMemoryUsage();
+#endif
     return 0;
 }
 
@@ -123,7 +188,9 @@ int TestParser(const char* language,
     {
         printf("Error loading context free grammar file\n");
         FreeGrammarTable(&grammar);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 1;
     }
     PrintGrammar(grammar);
@@ -135,7 +202,9 @@ int TestParser(const char* language,
         printf("Error building canonical LR parse tables.\n");
         FreeGrammarTable(&grammar);
         FreeLRParser(&parser);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 2;
     }
     PrintLRParser(parser, grammar);
@@ -149,7 +218,9 @@ int TestParser(const char* language,
         FreeGrammarTable(&grammar);
         FreeLRParser(&parser);
         FreeLexing(lexing, buffer);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 3;
     }
     PrintLexing(lexing);
@@ -163,7 +234,9 @@ int TestParser(const char* language,
         FreeLRParser(&parser);
         FreeLexing(lexing, buffer);
         //FreeParseTree(parseTree);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 4;
     }
     PrintParseTree(ast, grammar);
@@ -172,13 +245,14 @@ int TestParser(const char* language,
     FreeGrammarTable(&grammar);
     FreeLRParser(&parser);
     FreeLexing(lexing, buffer);
-    //FreeParseTree(ast);
+    FreeParseTree(ast);
+#ifdef _MEM_TRACKING
     PrintMemoryUsage();
+#endif
     getchar();
     return 0;
 }
 
-void ReduceProgramAST(SYNTAX_TREE** program);
 int GenerateParserAndTest(const char* language, 
                           const char* program, 
                           const char* output)
@@ -198,7 +272,9 @@ int GenerateParserAndTest(const char* language,
     {
         printf("Error loading context free grammar file\n");
         FreeGrammarTable(&grammar);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 1;
     }
     PrintGrammar(grammar);
@@ -210,7 +286,9 @@ int GenerateParserAndTest(const char* language,
         printf("Error building canonical LR parse tables.\n");
         FreeGrammarTable(&grammar);
         FreeLRParser(&parser);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 2;
     }
     PrintLRParser(parser, grammar);
@@ -221,6 +299,9 @@ int GenerateParserAndTest(const char* language,
         printf("Failed to generate parser.\n");
         FreeGrammarTable(&grammar);
         FreeLRParser(&parser);
+#ifdef _MEM_TRACKING
+        PrintMemoryUsage();
+#endif
         return 3;
     }
 
@@ -236,7 +317,9 @@ int GenerateParserAndTest(const char* language,
         FreeGrammarTable(&grammar);
         FreeLRParser(&parser);
         FreeLexing(lexing, buffer);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 3;
     }
     PrintLexing(lexing);
@@ -249,11 +332,11 @@ int GenerateParserAndTest(const char* language,
         FreeGrammarTable(&grammar);
         FreeLRParser(&parser);
         FreeLexing(lexing, buffer);
-        //FreeParseTree(parseTree);
+#ifdef _MEM_TRACKING
         PrintMemoryUsage();
+#endif
         return 4;
     }
-    ReduceProgramAST(&ast);
     PrintParseTree(ast, grammar);
 
     printf("Success.\n");
@@ -261,69 +344,19 @@ int GenerateParserAndTest(const char* language,
     FreeLRParser(&parser);
     FreeLexing(lexing, buffer);
     FreeParseTree(ast);
+#ifdef _MEM_TRACKING
     PrintMemoryUsage();
+#endif
     getchar();
     return 0;
-
-// ////////////////////////////////
-    
-    printf("Successfully generated parser!\n");
-    FreeGrammarTable(&grammar);
-    FreeLRParser(&parser);
-    PrintMemoryUsage();
-    return 0;
-}
-
-void ReduceProgramAST(SYNTAX_TREE** program)
-{
-    const unsigned int empty_production = 0xFF;
-    
-    //unsigned int child0_productions[] = { 35, 38, 40, 47, 50, 54, 57, 62 };
-    unsigned int reducibleTokens[] = { 0x100A, 0x100D, 0x100E, 0x100F, 0x1010, 0x1011, 0x1012 };
-    unsigned int i; 
-    unsigned int reducible = 1;
-    // continue while reducible
-    while (reducible)
-    {
-        reducible = 0;
-
-        /* productions that reduce to node->children[0] */
-        /* 35, 38, 40, 47, 50, 54, 57 */
-        //for (i = 0; i < sizeof(child0_productions)/sizeof(int); i++)
-        for (i = 0; i < sizeof(reducibleTokens)/sizeof(int); i++)
-        {
-            if ((*program)->token == reducibleTokens[i] &&
-                (*program)->numChildren == 1)
-            {
-                SYNTAX_TREE* cur = *program;
-                unsigned int child;
-
-                for (child = 1; child < cur->numChildren; child++)
-                {
-                    FreeParseTree(cur->children[child]);
-                }
-
-                *program = (*program)->children[0];
-                free(cur->children);
-                free(cur);
-                reducible = 1;
-            }
-        }
-    }
-
-    // apply for all sub-trees
-    for (i = 0; i < (*program)->numChildren; i++)
-    {
-        ReduceProgramAST(&(*program)->children[i]);
-    }
 }
 
 // compiler frontend
 int main(int argc, char** argv)
 {
-    int           error;
+    int error = 0;
 
-    GenerateParserAndTest("static-syntax.txt", "static-test.txt", "output/strongly_typed");
+    GenerateParserAndTest("simple.cfg", "simple.txt", "output/simple_test");
     getchar();
-    return 0;
+    return error;
 }
