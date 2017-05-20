@@ -280,6 +280,13 @@ L_TOKEN* LexSource(const char*    file,
             }
             i++;
         }
+#ifdef SEMICOLON_COMMENTS
+        else if (buffer[i] == ';')
+        {
+            while (i < size && buffer[i] != '\n') i++;
+            i--;
+        }
+#endif
 #ifdef IGNORE_MACROS
         else if (buffer[i] == '#')
         {

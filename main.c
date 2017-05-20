@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 {
     int error = 0;
 
-    GenerateParserAndTest("simple.cfg", "simple.txt", "output/simple_test");
+    GenerateParserAndTest("duck2.cfg", "duck2.txt", "output/duck");
     getchar();
     return error;
 }
