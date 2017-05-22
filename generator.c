@@ -271,6 +271,144 @@ void SaveDefines(FILE* file, GRAMMAR_TABLE grammar)
     fprintf(file, "\n\n");
 }
 
+/* *** */
+void SaveJSTables(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser) 
+{
+    int* gotoTable = parser.gotoTable;
+    ACTION* actionTable = parser.actionTable;
+    unsigned int gotoLength = parser.numSymbols * parser.numStates;
+    unsigned int actionLength = parser.numStates * parser.numTokens;
+    unsigned int start, end, count = 0;
+    unsigned int s, t;
+
+    const int GOTO_NIL = -1;
+
+    fprintf(file, 
+        "/* DUCK LANGUAGE PARSER AND GRAMMAR */\n"
+        "var GRAMMAR = {\n"
+        "  tokens: [\""
+    );
+
+    int j = grammar.numTokens;
+    for (int i = 0; j; i++) {
+        if (grammar.tokens[i] == 0) {
+            j--;
+            if (j) {
+                fprintf(file, "\",\"");
+            } else {
+                fprintf(file, "\"");
+            }
+        } else {
+            char character = grammar.tokens[i];
+            if (character == '"' || character == '\'') {
+                fprintf(file, "\\");
+            }
+            fprintf(file, "%c", character);
+        }
+    }
+
+    fprintf(file, 
+        "],\n"
+        "  symbols: [\""
+    );
+    
+    j = grammar.numSymbols;
+    for (int i = 0; j; i++) {
+        if (grammar.symbols[i] == 0) {
+            j--;
+            if (j) {
+                fprintf(file, "\",\"");
+            } else {
+                fprintf(file, "\"");
+            }
+        } else {
+            char character = grammar.symbols[i];
+            if (character == '"' || character == '\'') {
+                fprintf(file, "\\");
+            }
+            fprintf(file, "%c", character);
+        }
+    }
+
+    fprintf(file, 
+        "]\n"
+        "};\n"
+    );
+
+
+    fprintf(file, 
+        "var PARSER = {\n  GOTO_TABLE: [],\n  ACTION_TABLE: [],\n  numTokens: %i,\n  numSymbols: %i,\n  numStates: %i\n};\n"
+        "/* TABLE ROUTINES */\n"
+        "var X = function(data)\n{\n"
+        "  for (var a = 0; a < data.length; a += 2)\n  {\n"
+        "    var index = data[a], sequence = data[a+1];\n"
+        "    for (var i = 0; i < sequence.length; i++)\n"
+        "      PARSER.GOTO_TABLE[index+i] = sequence[i];\n"
+        "  }\n};\n"
+        "var Z = function(data)\n{\n"
+        "  for (var a = 0; a < data.length; a += 2)\n  {\n"
+        "    var index = data[a], sequence = data[a+1];\n"
+        "    for (var i = 0, j = 0; j < sequence.length; i++,j+=2)\n"
+        "      PARSER.ACTION_TABLE[index+i] = {\"type\": sequence[j], \"value\": sequence[j+1]};\n"
+        "  }\n};\n",
+        parser.numTokens, parser.numSymbols, parser.numStates
+    );
+
+    fprintf(file, "/* GOTO TABLE */\n");
+
+    start = 0;
+    fprintf(file, "X([\n");
+    while (start < gotoLength) {
+        if (gotoTable[start] == GOTO_NIL) {
+            start++;
+        } else {
+            if (count) fprintf(file, ",\n");
+            fprintf(file, "%i,[", start);
+            for (end = start; end < gotoLength; end++) {
+                if (gotoTable[end] == GOTO_NIL) break;
+                if (end != start) fprintf(file, ",");
+                fprintf(file, "%i", gotoTable[end]);
+            }
+            fprintf(file, "]");
+            start = end;
+            count++;
+        }
+    }
+    fprintf(file, "\n]);\n");
+
+    fprintf(file, "\n/* ACTION TABLE */\n");
+
+    count = 0;
+    fprintf(file, "Z([\n");
+    while (start < actionLength) {
+        if (actionTable[start].type == ACTION_ERROR) {
+            start++; 
+        } else {
+            if (count) fprintf(file, ",\n");
+            fprintf(file, "%i,[", start);
+            for (end = start; end < actionLength; end++) {
+                if (actionTable[end].type == ACTION_ERROR) break;
+                if (end != start) fprintf(file, ",");
+                fprintf(file, "%i,%i", actionTable[end].type, actionTable[end].value);
+            }
+            fprintf(file, "]");
+            start = end;
+            count++;
+        }
+    }
+
+    fprintf(file, "\n]);\n");
+
+}
+
+/* *** */
+/* *** */
+void SaveJSCode(FILE* file, LR_TABLE parser) 
+{
+
+}
+/* *** */
+
 /* save the binary data of a grammar file to a header */
 void SaveGrammar(FILE* file, GRAMMAR_TABLE grammar, unsigned int bExtern)
 {
@@ -1058,6 +1196,7 @@ int SaveLRParser(const char*   output,
     char* tables;
     char* compressed_tables;
     char* source;
+    char* tablesjs, *codejs;
     int length;
     
     if (output == NULL || output[0] == '\0')
@@ -1070,11 +1209,15 @@ int SaveLRParser(const char*   output,
     header = (char*)malloc(length + 3);
     tables = (char*)malloc(length + 5);
     source = (char*)malloc(length + 3);
+    tablesjs = (char*)malloc(length + 6);
+    codejs = (char*)malloc(length + 4);
     compressed_tables = (char*)malloc(length + 16);
     
     sprintf(header, "%s.h", output);
     sprintf(tables, "%s_t.c", output);
     sprintf(source, "%s.c", output);
+    sprintf(tablesjs, "%s_t.js", output);
+    sprintf(codejs, "%s.js", output);
     sprintf(compressed_tables, "%s_compressed.h", output);
 
     // header name without directories
@@ -1123,6 +1266,32 @@ int SaveLRParser(const char*   output,
     fclose(file);
 #endif
 
+#if 1
+    file = fopen(tablesjs, "w");
+    if (file == 0) {
+        printf("Could not open js table file for output.\n");
+        return 1;
+    }
+
+    SaveJSTables(file, grammar, parser);
+
+    fprintf(file, "");
+    fclose(file);
+
+
+    file = fopen(codejs, "w");
+    if (file == 0) {
+        printf("Could not open js table file for output.\n");
+        return 1;
+    }
+
+    SaveJSCode(file, parser);
+
+    fprintf(file, "");
+    fclose(file);
+
+#endif
+
     // save source file
     file = fopen(source, "w");
     if (file == 0) {
@@ -1156,6 +1325,8 @@ int SaveLRParser(const char*   output,
 
 #endif
     
+    free(tablesjs);
+    free(codejs);
     free(header);
     free(tables);
     free(source);
