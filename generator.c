@@ -331,9 +331,37 @@ void SaveJSTables(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
     }
 
     fprintf(file, 
-        "]\n"
-        "};\n"
+        "],\n"
+        "  ruleSymbol: ["
     );
+
+    for (int i = 0; i < grammar.numRules; i++) {
+        if (i) {
+            fprintf(file, ",");
+        }
+        int symbol = grammar.rules[i].lhs;
+        if (symbol & K_SYMBOL) symbol ^= K_SYMBOL;
+        fprintf(file, "%i", symbol);
+    }
+
+    fprintf(file, 
+        "],\n"
+        "  ruleLen: ["
+    );
+
+    for (int i = 0; i < grammar.numRules; i++) {
+        if (i) {
+            fprintf(file, ",");
+        }
+        fprintf(file, "%i", grammar.rules[i].rhsLength);
+    }
+
+    fprintf(file, 
+        "],\n"
+        "  numRules: %i\n};\n",
+        grammar.numRules
+    );
+
 
 
     fprintf(file, 
@@ -378,7 +406,7 @@ void SaveJSTables(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
 
     fprintf(file, "\n/* ACTION TABLE */\n");
 
-    count = 0;
+    count = 0; start = 0;
     fprintf(file, "Z([\n");
     while (start < actionLength) {
         if (actionTable[start].type == ACTION_ERROR) {
