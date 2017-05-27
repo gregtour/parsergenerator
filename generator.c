@@ -609,6 +609,36 @@ void SaveJSCode(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
     int j, count, index;
 
     fprintf(file,
+        "/* asynchronous function evaluator */\n"
+        "var RUN_STEPS = 1000;\n"
+        "var CMD_SEQUENCE = [];\n"
+        "\n"
+        "function RunProgram(AST) {\n"
+        "    CMD_SEQUENCE.push([Dispatch, AST])\n"
+        "    RunAsync();\n"
+        "}\n"
+        "\n"
+        "function ProgramTerm() {\n"
+        "    console.log(\"Program is complete.\");\n"
+        "}\n"
+        "\n"
+        "function RunAsync() {\n"
+        "    var steps = RUN_STEPS;\n"
+        "    while (steps-- && CMD_SEQUENCE.length > 0) {\n"
+        "        var command = CMD_SEQUENCE.unshift();\n"
+        "        var fun = command[0];\n"
+        "        var args = command.slice(1);\n"
+        "        fun.call(this, args);\n"
+        "    }\n"
+        "    if (CMD_SEQUENCE.length > 0) {\n"
+        "        setTimeout(RunAsync, 0);\n"
+        "    } else {\n"
+        "        ProgramTerm();\n"
+        "    }\n"
+        "}\n\n"
+        );
+
+    fprintf(file,
         "/* parser generator ast walk */\n"
         "var _DISPATCH;\n");
     fprintf(file,
@@ -617,11 +647,15 @@ void SaveJSCode(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
         "\tif (_DISPATCH[rule]) {\n"
         "\t\treturn _DISPATCH[rule](subtree);\n"
         "\t}\n"
-        "}\n"
-        "\n");
+        "}\n\n\n");
 
     for (r = 1; r < grammar.numRules; r++)
     {
+        int intTokens = 0;
+        int floatTokens = 0;
+        int stringTokens = 0;
+        int idTokens = 0;
+
         rule = grammar.rules[r];
 
         if (!blank(rule)) {
@@ -629,13 +663,38 @@ void SaveJSCode(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
             fprintf(file, "// ");
             fprintrule(file, rule, grammar);
             fprintf(file, "\n");
-            fprintf(file, "function %s(subtree) {\n\treturn;\n}",
-                RuleName(r, grammar));
+            fprintf(file, "function %s(subtree) {\n", RuleName(r, grammar));
 
-            fprintf(file, "\n\n");
+            // HANDLE TOKENS
+            for (rhs = 0; rhs < rule.rhsLength; rhs++) 
+            {
+                int symbol = rule.rhs[rhs];
+
+                if (symbol == gSymbolInteger) {
+                    fprintf(file, "\tinteger%i = parseInt(subtree.child[%i].string);\n", ++intTokens, rhs);
+                } else if (symbol == gSymbolFloat) {
+                    fprintf(file, "\tfloat%i = parseFloat(subtree.child[%i].string);\n", ++floatTokens, rhs);
+                } else if (symbol == gSymbolString) {
+                    fprintf(file, "\tstring%i = subtree.child[%i].string;\n", ++stringTokens, rhs);
+                } else if (symbol == gSymbolIdentifier) {
+                    fprintf(file, "\tidentifier%i = subtree.child[%i].string;\n", ++idTokens, rhs);
+                }
+            }
+
+            // HANDLE SUBTREES
+            for (rhs = 0; rhs < rule.rhsLength; rhs++) {
+                int symbol = rule.rhs[rhs];
+                if (symbol & K_SYMBOL) {
+                    fprintf(file, "\tCMD_SEQUENCE.push([Dispatch, subtree.child[%i]]);\t", rhs);
+                    fprintf(file, "// %s\n", GetElement(symbol, grammar));
+                }
+            }
+
+            fprintf(file, "\treturn;\n}\n\n\n");
         }
     }
 
+    fprintf(file, "/* function table */\n");
     fprintf(file, "_DISPATCH = [null, ");
     for (r = 1; r < grammar.numRules; r++)
     {
