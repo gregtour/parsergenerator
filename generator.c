@@ -429,10 +429,225 @@ void SaveJSTables(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
 
 }
 
-/* *** */
-/* *** */
-void SaveJSCode(FILE* file, LR_TABLE parser) 
+/*
+
+void SaveProductions(FILE*         file,
+                     LR_TABLE      parser,
+                     GRAMMAR_TABLE grammar)
 {
+    RULE rule;
+    int r, rhs;
+    const char* name;
+    int j, count, index;
+
+    fprintf(file, "/* production stubs *\/\n\n");
+    for (r = 1; r < grammar.numRules; r++)
+    {
+        rule = grammar.rules[r];
+
+        fprintf(file, "/* ");
+        fprintf(file, "%i. ", r);
+        fprintf(file, "%s -> ", GetElement(rule.lhs, grammar));
+        for (rhs = 0; rhs < rule.rhsLength; rhs++)
+        {
+            fprintf(file, "%s ", GetElement(rule.rhs[rhs], grammar));
+        }
+        fprintf(file, "*\/\n");
+        
+        fprintf(file, "int Reduce%s(SYNTAX_TREE* node)\n",
+            RuleName(r, grammar));
+        fprintf(file, "{\n");
+        //fprintf(file, "    if (node->numChildren != %i) return %i;\n",
+        //    rule.rhsLength, r);
+        fprintf(file, "    Assert(node->numChildren == %i);\n", rule.rhsLength);
+        for (rhs = 0; rhs < rule.rhsLength; rhs++)
+        {
+            int symbol = rule.rhs[rhs];
+            if (symbol & K_SYMBOL ||
+                symbol == gSymbolInteger ||
+                symbol == gSymbolFloat ||
+                symbol == gSymbolString ||
+                symbol == gSymbolIdentifier)
+            {
+                fprintf(file, "    SYNTAX_TREE* ");
+                
+                name = GetElement(symbol, grammar);
+                for (j = 0; name[j]; j++)
+                {
+                    if (name[j] != '<' && name[j] != '>')
+                    {
+                        if (isAlpha(name[j]) || isNumeric(name[j]))
+                            fprintf(file, "%c", name[j]);
+                        else
+                            fprintf(file, "_");
+                    }
+                }
+                
+                count = 0;
+                for (j = 0; j < rule.rhsLength; j++)
+                {
+                    if (rule.rhs[j] == symbol)
+                        count++;
+                    if (j == rhs)
+                        index = count;
+                }
+                
+                fprintf(file, "%i", index);
+                
+                fprintf(file, " = ");
+                fprintf(file, "node->children[%i];\n", rhs);
+            }
+        }
+        
+        fprintf(file, "\n");
+        fprintf(file, "    int error = 0;\n");
+        for (rhs = 0; rhs < rule.rhsLength; rhs++)
+        {
+            int symbol = rule.rhs[rhs];
+            if (symbol & K_SYMBOL ||
+                symbol == gSymbolInteger ||
+                symbol == gSymbolFloat ||
+                symbol == gSymbolString ||
+                symbol == gSymbolIdentifier)
+            {
+                fprintf(file, "    error = (error ? error : ProcessNode(");
+
+                name = GetElement(symbol, grammar);
+                for (j = 0; name[j]; j++)
+                {
+                    if (name[j] != '<' && name[j] != '>')
+                    {
+                        if (isAlpha(name[j]) || isNumeric(name[j]))
+                            fprintf(file, "%c", name[j]);
+                        else
+                            fprintf(file, "_");
+                    }
+                }
+
+                count = 0;
+                for (j = 0; j < rule.rhsLength; j++)
+                {
+                    if (rule.rhs[j] == symbol)
+                        count++;
+                    if (j == rhs)
+                        index = count;
+                }
+
+                fprintf(file, "%i", index);
+                fprintf(file, "));\n");
+            }
+        }
+        
+        fprintf(file, "\n");
+        fprintf(file, "    return error;\n");
+        fprintf(file, "}\n");
+
+        fprintf(file, "\n");
+    }
+}
+
+void SaveCompiler(FILE*         file,
+                  LR_TABLE      parser,
+                  GRAMMAR_TABLE grammar)
+{
+    int r;
+
+    fprintf(file, "/* reduce one node *\/\n");
+    fprintf(file, "int ProcessNode(SYNTAX_TREE* node)\n");
+    fprintf(file, "{\n");
+    fprintf(file, "    if (node == NULL || node->production == 0)\n");
+    fprintf(file, "        return 1;\n\n");
+    fprintf(file, "    switch (node->production)\n");
+    fprintf(file, "    {\n");
+    
+    for (r = 1; r < grammar.numRules; r++)
+    {
+        fprintf(file, "        ");
+        fprintf(file, "case 0x%.2X: return Reduce%s(node);\n", r,
+            RuleName(r, grammar));
+    }
+
+    fprintf(file, "    default:\n");
+    fprintf(file, "        printf(\"Unknown production %%i.\\n\",");
+    fprintf(file, " node->production);\n");
+    fprintf(file, "        return 1;\n");
+    fprintf(file, "    }\n");
+    fprintf(file, "}\n");
+}
+
+*/
+
+int blank(RULE rule) {
+    int rhs;
+    for (rhs = 0; rhs < rule.rhsLength; rhs++) {
+        int symbol = rule.rhs[rhs];
+        if (symbol != gSymbolEpsilon && gSymbolEpsilon != gSymbolEOF && 
+            symbol != gSymbolEndLine)
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void fprintrule(FILE* file, RULE rule, GRAMMAR_TABLE grammar) {
+    int rhs;
+    fprintf(file, "%s -> ", GetElement(rule.lhs, grammar));
+    for (rhs = 0; rhs < rule.rhsLength; rhs++)
+    {
+        fprintf(file, "%s ", GetElement(rule.rhs[rhs], grammar));
+    }
+}
+
+/* *** */
+/* *** */
+void SaveJSCode(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser) 
+{
+    RULE rule;
+    int r, rhs;
+    const char* name;
+    int j, count, index;
+
+    fprintf(file,
+        "/* parser generator ast walk */\n"
+        "var _DISPATCH;\n");
+    fprintf(file,
+        "function Dispatch(subtree) {\n"
+        "\tvar rule = subtree.rule;\n"
+        "\tif (_DISPATCH[rule]) {\n"
+        "\t\treturn _DISPATCH[rule](subtree);\n"
+        "\t}\n"
+        "}\n"
+        "\n");
+
+    for (r = 1; r < grammar.numRules; r++)
+    {
+        rule = grammar.rules[r];
+
+        if (!blank(rule)) {
+            // print CFG comment hint
+            fprintf(file, "// ");
+            fprintrule(file, rule, grammar);
+            fprintf(file, "\n");
+            fprintf(file, "function %s(subtree) {\n\treturn;\n}",
+                RuleName(r, grammar));
+
+            fprintf(file, "\n\n");
+        }
+    }
+
+    fprintf(file, "_DISPATCH = [null, ");
+    for (r = 1; r < grammar.numRules; r++)
+    {
+        rule = grammar.rules[r];
+        fprintf(file, "%s", (blank(rule) ? "null" : RuleName(r, grammar)));
+        if (r < grammar.numRules - 1) {
+            fprintf(file, ", ");
+        }
+    }    
+    fprintf(file, "];\n\n");
+
+
 
 }
 /* *** */
@@ -1313,7 +1528,7 @@ int SaveLRParser(const char*   output,
         return 1;
     }
 
-    SaveJSCode(file, parser);
+    SaveJSCode(file, grammar, parser);
 
     fprintf(file, "");
     fclose(file);
