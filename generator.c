@@ -278,9 +278,45 @@ void SaveJSTables(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
     ACTION* actionTable = parser.actionTable;
     unsigned int gotoLength = parser.numSymbols * parser.numStates;
     unsigned int actionLength = parser.numStates * parser.numTokens;
-    unsigned int start, end, count = 0;
+    unsigned int start, end, count = 0, xcount;
     unsigned int s, t;
 
+    int   _outputBufferLen = 0;
+    int   _outputBufferSize = 2000;
+    char* _outputBuffer = malloc(sizeof(char) * _outputBufferSize);
+
+#define COMMIT(f) \
+    { \
+        0;/*fwrite(_outputBuffer, sizeof(char), _outputBufferLen, f); */\
+    }
+/*
+#define fprintf(f,...) \
+    { \
+        int written = 0; \
+        int capacity; \
+        do { \
+            capacity = _outputBufferSize - _outputBufferLen - 1; \
+            written = snprintf(_outputBuffer + _outputBufferLen, sizeof(char) * capacity, __VA_ARGS__); \
+            if (written > capacity) { \
+                _outputBufferSize *= 2; \
+                _outputBuffer = realloc(_outputBuffer, sizeof(char) * _outputBufferSize); \
+            } \
+        } while (written > capacity); \
+        _outputBufferLen += written; \
+    }
+//*/
+#define LINE_LIMIT() 
+/*    { \
+        int lastNewline = _outputBufferLen; \
+        do { \
+            lastNewline--; \
+            if (_outputBuffer[lastNewline] == '\n') break; \
+        } while (lastNewline != 0); \
+        if (_outputBufferLen - lastNewline > 8000) { \
+            fprintf(0,"\n"); \
+        } \
+    }
+//*/
     const int GOTO_NIL = -1;
 
     fprintf(file, 
@@ -362,71 +398,156 @@ void SaveJSTables(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
         grammar.numRules
     );
 
+/*
+    function _GOTO(data) {
+        var index, seq;
+        while (data.length) {
+            index = data.shift();
+            seq = data.shift();
+            if (typeof seq === 'number') 
+                PARSER.GOTO_TABLE[index] = seq;
+            else while (seq.length)
+                PARSER.GOTO_TABLE[index++] = seq.shift();
+        }
+    }
+    function _ACTION(data) {
+        var index, seq;
+        while (data.length) {
+            index = data.shift();
+            seq = data.shift();
+            if (typeof seq === 'number')
+                PARSER.ACTION_TABLE[index] = {'type':seq,'value':data.shift()};
+            else while (seq.length)
+                PARSER.ACTION_TABLE[index++] = {'type':seq.shift(),'value':seq.shift()};
+        }
+    }
+*/
 
 
     fprintf(file, 
-        "var PARSER = {\n  GOTO_TABLE: [],\n  ACTION_TABLE: [],\n  numTokens: %i,\n  numSymbols: %i,\n  numStates: %i\n};\n"
-        "/* TABLE ROUTINES */\n"
-        "var X = function(data)\n{\n"
+        "var PARSER = {\n  GOTO_TABLE: [],\n  ACTION_TABLE: [],\n  numTokens: %i,\n  numSymbols: %i,\n  numStates: %i\n};\n",
+        parser.numTokens, parser.numSymbols, parser.numStates
+        );
+
+    fprintf(file,
+        "function _GOTO(data) {"
+        "var index,seq;"
+        "while(data.length){"
+        "index=data.shift();"
+        "seq=data.shift();"
+        "if(typeof seq ==='number')"
+        "PARSER.GOTO_TABLE[index]=seq;"
+        "else while(seq.length)"
+        "PARSER.GOTO_TABLE[index++]=seq.shift();"
+        "}}\n"
+        "function _ACTION(data) {"
+        "var index,seq;"
+        "while(data.length){"
+        "index=data.shift();"
+        "seq=data.shift();"
+        "if(typeof seq ==='number')"
+        "PARSER.ACTION_TABLE[index]={'type':seq,'value':data.shift()};"
+        "else while(seq.length)"
+        "PARSER.ACTION_TABLE[index++]={'type':seq.shift(),'value':seq.shift()};"
+        "}}\n");
+/*
+    fprintf(file,
+        "// TABLE ROUTINES\n"
+        "var _GOTO = function(data)\n{\n"
         "  for (var a = 0; a < data.length; a += 2)\n  {\n"
         "    var index = data[a], sequence = data[a+1];\n"
         "    for (var i = 0; i < sequence.length; i++)\n"
         "      PARSER.GOTO_TABLE[index+i] = sequence[i];\n"
         "  }\n};\n"
-        "var Z = function(data)\n{\n"
+        "var _ACTION = function(data)\n{\n"
         "  for (var a = 0; a < data.length; a += 2)\n  {\n"
         "    var index = data[a], sequence = data[a+1];\n"
         "    for (var i = 0, j = 0; j < sequence.length; i++,j+=2)\n"
         "      PARSER.ACTION_TABLE[index+i] = {\"type\": sequence[j], \"value\": sequence[j+1]};\n"
-        "  }\n};\n",
-        parser.numTokens, parser.numSymbols, parser.numStates
-    );
-
+        "  }\n};\n"
+        );
+*/
     fprintf(file, "/* GOTO TABLE */\n");
 
-    start = 0;
-    fprintf(file, "X([\n");
+    count = 0; start = 0;
+    fprintf(file, "_GOTO([");
     while (start < gotoLength) {
         if (gotoTable[start] == GOTO_NIL) {
             start++;
         } else {
-            if (count) fprintf(file, ",\n");
-            fprintf(file, "%i,[", start);
+            if (count) {
+                fprintf(file, ",");
+                LINE_LIMIT();
+            }
+            fprintf(file, "%i,", start);
+            LINE_LIMIT();
+
+            xcount = 0;
+            for (xcount = start; xcount < gotoLength; xcount++) {
+                if (gotoTable[xcount] == GOTO_NIL) break;
+            }
+            xcount -= start;
+
+            if (xcount > 1) fprintf(file, "[");
             for (end = start; end < gotoLength; end++) {
                 if (gotoTable[end] == GOTO_NIL) break;
-                if (end != start) fprintf(file, ",");
+                if (end != start) {
+                    fprintf(file, ",");
+                    LINE_LIMIT();
+                }
                 fprintf(file, "%i", gotoTable[end]);
             }
-            fprintf(file, "]");
+            if (xcount > 1) fprintf(file, "]");
             start = end;
             count++;
         }
     }
-    fprintf(file, "\n]);\n");
+    fprintf(file, "]);\n");
 
     fprintf(file, "\n/* ACTION TABLE */\n");
 
     count = 0; start = 0;
-    fprintf(file, "Z([\n");
+    fprintf(file, "_ACTION([");
     while (start < actionLength) {
         if (actionTable[start].type == ACTION_ERROR) {
             start++; 
         } else {
-            if (count) fprintf(file, ",\n");
-            fprintf(file, "%i,[", start);
+            if (count) {
+                fprintf(file, ",");
+                LINE_LIMIT();
+            }
+            fprintf(file, "%i,", start);
+            LINE_LIMIT();
+
+            xcount = 0;
+            for (xcount = start; xcount < actionLength; xcount++) {
+                if (actionTable[xcount].type == ACTION_ERROR) break;
+            }
+            xcount -= start;
+
+            if (xcount > 1) fprintf(file, "[");
             for (end = start; end < actionLength; end++) {
                 if (actionTable[end].type == ACTION_ERROR) break;
-                if (end != start) fprintf(file, ",");
-                fprintf(file, "%i,%i", actionTable[end].type, actionTable[end].value);
+                if (end != start) {
+                    fprintf(file, ",");
+                    LINE_LIMIT();
+                }
+                fprintf(file, "%i,", actionTable[end].type);
+                LINE_LIMIT();
+                fprintf(file, "%i", actionTable[end].value);
+                LINE_LIMIT();
             }
-            fprintf(file, "]");
+            if (xcount > 1) fprintf(file, "]");
             start = end;
             count++;
         }
     }
 
-    fprintf(file, "\n]);\n");
-
+    fprintf(file, "]);\n");
+#undef fprintf
+    COMMIT(file);
+#undef COMMIT
+#undef LINE_LIMIT
 }
 
 /*

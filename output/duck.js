@@ -205,62 +205,33 @@ function StmtO(subtree) {
 }
 
 
-// <class> -> class <identifier> <endl> <class-body> 
-function ClassA(subtree) {
+// <class> -> class <identifier> <parameters> <class-ext> 
+function Class(subtree) {
 	identifier1 = subtree.child[1].string;
+	CMD_SEQUENCE.push([Dispatch, subtree.child[2]]);	// <parameters>
+	CMD_SEQUENCE.push([Dispatch, subtree.child[3]]);	// <class-ext>
+	return;
+}
+
+
+// <class-ext> -> extends <identifier-list> <endl> <class-body> 
+function ClassExtA(subtree) {
+	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <identifier-list>
 	CMD_SEQUENCE.push([Dispatch, subtree.child[3]]);	// <class-body>
 	return;
 }
 
 
-// <class> -> class <identifier> extends <identifier-list> <endl> <class-body> 
-function ClassB(subtree) {
-	identifier1 = subtree.child[1].string;
-	CMD_SEQUENCE.push([Dispatch, subtree.child[3]]);	// <identifier-list>
-	CMD_SEQUENCE.push([Dispatch, subtree.child[5]]);	// <class-body>
+// <class-ext> -> <endl> <class-body> 
+function ClassExtB(subtree) {
+	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <class-body>
 	return;
 }
 
 
-// <class-body> -> <class-block> endclass 
+// <class-body> -> <block> endclass 
 function ClassBody(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <class-block>
-	return;
-}
-
-
-// <class-block> -> <class-stmt> <class-block> 
-function ClassBlockA(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <class-stmt>
-	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <class-block>
-	return;
-}
-
-
-// <class-stmt> -> static <assignment> <endl> 
-function ClassStmtA(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <assignment>
-	return;
-}
-
-
-// <class-stmt> -> static <function> <endl> 
-function ClassStmtB(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <function>
-	return;
-}
-
-
-// <class-stmt> -> <assignment> <endl> 
-function ClassStmtC(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <assignment>
-	return;
-}
-
-
-// <class-stmt> -> <function> <endl> 
-function ClassStmtD(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <function>
+	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <block>
 	return;
 }
 
@@ -380,9 +351,9 @@ function ForStartB(subtree) {
 }
 
 
-// <for-start> -> in <final> do <endl> <loop-end> 
+// <for-start> -> in <value> do <endl> <loop-end> 
 function ForStartC(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <final>
+	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <value>
 	CMD_SEQUENCE.push([Dispatch, subtree.child[4]]);	// <loop-end>
 	return;
 }
@@ -642,17 +613,17 @@ function ComparisonF(subtree) {
 }
 
 
-// <comparison> -> <final> is <l-value> 
+// <comparison> -> <value> is <l-value> 
 function ComparisonG(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <final>
+	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <value>
 	CMD_SEQUENCE.push([Dispatch, subtree.child[2]]);	// <l-value>
 	return;
 }
 
 
-// <comparison> -> <final> is not <l-value> 
+// <comparison> -> <value> is not <l-value> 
 function ComparisonH(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <final>
+	CMD_SEQUENCE.push([Dispatch, subtree.child[0]]);	// <value>
 	CMD_SEQUENCE.push([Dispatch, subtree.child[3]]);	// <l-value>
 	return;
 }
@@ -762,16 +733,8 @@ function ValueC(subtree) {
 }
 
 
-// <value> -> new <l-value> ( <arguments> ) 
-function ValueD(subtree) {
-	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <l-value>
-	CMD_SEQUENCE.push([Dispatch, subtree.child[3]]);	// <arguments>
-	return;
-}
-
-
 // <value> -> ( <expr> ) 
-function ValueE(subtree) {
+function ValueD(subtree) {
 	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <expr>
 	return;
 }
@@ -876,5 +839,5 @@ function DictionaryEntry(subtree) {
 
 
 /* function table */
-_DISPATCH = [null, Program, TopLevelBlockA, null, IdentifierListA, IdentifierListB, null, null, TopLevelStmtA, TopLevelStmtB, TopLevelStmtC, TopLevelStmtD, BlockA, null, StmtA, StmtB, StmtC, StmtD, StmtE, StmtF, StmtG, StmtH, StmtI, StmtJ, StmtK, StmtL, StmtM, StmtN, StmtO, null, ClassA, ClassB, ClassBody, ClassBlockA, null, ClassStmtA, ClassStmtB, ClassStmtC, ClassStmtD, null, FunctionA, FunctionB, FunctionDef, ParametersA, ParametersB, null, null, ArgumentsB, ExprListA, ExprListB, If, ElseifA, ElseifB, ElseifC, For, ForStartA, ForStartB, ForStartC, WhileA, WhileB, LoopEnd, LetBlock, BindingsA, BindingsB, Binding, TryBlock, CatchBlockA, CatchBlockB, AssignmentA, AssignmentB, SelfAssignmentA, SelfAssignmentB, SelfAssignmentC, SelfAssignmentD, SelfAssignmentE, SelfAssignmentF, LValueA, LValueB, LValueC, Expr, ConditionA, ConditionB, ConditionC, LogicA, LogicB, ComparisonA, ComparisonB, ComparisonC, ComparisonD, ComparisonE, ComparisonF, ComparisonG, ComparisonH, ComparisonI, ArithmeticA, ArithmeticB, ArithmeticC, TermA, TermB, TermC, TermD, FactorA, FactorB, FactorC, ValueA, ValueB, ValueC, ValueD, ValueE, PrimitiveA, PrimitiveB, PrimitiveC, PrimitiveD, PrimitiveE, ObjectA, ObjectB, ObjectC, ArrayInitA, ArrayInitB, DictionaryInitA, DictionaryInitB, DictionaryEntry];
+_DISPATCH = [null, Program, TopLevelBlockA, null, IdentifierListA, IdentifierListB, null, null, TopLevelStmtA, TopLevelStmtB, TopLevelStmtC, TopLevelStmtD, BlockA, null, StmtA, StmtB, StmtC, StmtD, StmtE, StmtF, StmtG, StmtH, StmtI, StmtJ, StmtK, StmtL, StmtM, StmtN, StmtO, null, Class, ClassExtA, ClassExtB, ClassBody, FunctionA, FunctionB, FunctionDef, ParametersA, ParametersB, null, null, ArgumentsB, ExprListA, ExprListB, If, ElseifA, ElseifB, ElseifC, For, ForStartA, ForStartB, ForStartC, WhileA, WhileB, LoopEnd, LetBlock, BindingsA, BindingsB, Binding, TryBlock, CatchBlockA, CatchBlockB, AssignmentA, AssignmentB, SelfAssignmentA, SelfAssignmentB, SelfAssignmentC, SelfAssignmentD, SelfAssignmentE, SelfAssignmentF, LValueA, LValueB, LValueC, Expr, ConditionA, ConditionB, ConditionC, LogicA, LogicB, ComparisonA, ComparisonB, ComparisonC, ComparisonD, ComparisonE, ComparisonF, ComparisonG, ComparisonH, ComparisonI, ArithmeticA, ArithmeticB, ArithmeticC, TermA, TermB, TermC, TermD, FactorA, FactorB, FactorC, ValueA, ValueB, ValueC, ValueD, PrimitiveA, PrimitiveB, PrimitiveC, PrimitiveD, PrimitiveE, ObjectA, ObjectB, ObjectC, ArrayInitA, ArrayInitB, DictionaryInitA, DictionaryInitB, DictionaryEntry];
 

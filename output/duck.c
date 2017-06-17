@@ -345,131 +345,61 @@ int ReduceStmtP(SYNTAX_TREE* node)
     return error;
 }
 
-/* 30. <class> -> class <identifier> <endl> <class-body> */
-int ReduceClassA(SYNTAX_TREE* node)
+/* 30. <class> -> class <identifier> <parameters> <class-ext> */
+int ReduceClass(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
     SYNTAX_TREE* identifier1 = node->children[1];
-    SYNTAX_TREE* class_body1 = node->children[3];
+    SYNTAX_TREE* parameters1 = node->children[2];
+    SYNTAX_TREE* class_ext1 = node->children[3];
 
     int error = 0;
     error = (error ? error : ProcessNode(identifier1));
-    error = (error ? error : ProcessNode(class_body1));
+    error = (error ? error : ProcessNode(parameters1));
+    error = (error ? error : ProcessNode(class_ext1));
 
     return error;
 }
 
-/* 31. <class> -> class <identifier> extends <identifier-list> <endl> <class-body> */
-int ReduceClassB(SYNTAX_TREE* node)
+/* 31. <class-ext> -> extends <identifier-list> <endl> <class-body> */
+int ReduceClassExtA(SYNTAX_TREE* node)
 {
-    Assert(node->numChildren == 6);
-    SYNTAX_TREE* identifier1 = node->children[1];
-    SYNTAX_TREE* identifier_list1 = node->children[3];
-    SYNTAX_TREE* class_body1 = node->children[5];
+    Assert(node->numChildren == 4);
+    SYNTAX_TREE* identifier_list1 = node->children[1];
+    SYNTAX_TREE* class_body1 = node->children[3];
 
     int error = 0;
-    error = (error ? error : ProcessNode(identifier1));
     error = (error ? error : ProcessNode(identifier_list1));
     error = (error ? error : ProcessNode(class_body1));
 
     return error;
 }
 
-/* 32. <class-body> -> <class-block> endclass */
+/* 32. <class-ext> -> <endl> <class-body> */
+int ReduceClassExtB(SYNTAX_TREE* node)
+{
+    Assert(node->numChildren == 2);
+    SYNTAX_TREE* class_body1 = node->children[1];
+
+    int error = 0;
+    error = (error ? error : ProcessNode(class_body1));
+
+    return error;
+}
+
+/* 33. <class-body> -> <block> endclass */
 int ReduceClassBody(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
-    SYNTAX_TREE* class_block1 = node->children[0];
+    SYNTAX_TREE* block1 = node->children[0];
 
     int error = 0;
-    error = (error ? error : ProcessNode(class_block1));
+    error = (error ? error : ProcessNode(block1));
 
     return error;
 }
 
-/* 33. <class-block> -> <class-stmt> <class-block> */
-int ReduceClassBlockA(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 2);
-    SYNTAX_TREE* class_stmt1 = node->children[0];
-    SYNTAX_TREE* class_block1 = node->children[1];
-
-    int error = 0;
-    error = (error ? error : ProcessNode(class_stmt1));
-    error = (error ? error : ProcessNode(class_block1));
-
-    return error;
-}
-
-/* 34. <class-block> -> */
-int ReduceClassBlockB(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 0);
-
-    int error = 0;
-
-    return error;
-}
-
-/* 35. <class-stmt> -> static <assignment> <endl> */
-int ReduceClassStmtA(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 3);
-    SYNTAX_TREE* assignment1 = node->children[1];
-
-    int error = 0;
-    error = (error ? error : ProcessNode(assignment1));
-
-    return error;
-}
-
-/* 36. <class-stmt> -> static <function> <endl> */
-int ReduceClassStmtB(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 3);
-    SYNTAX_TREE* function1 = node->children[1];
-
-    int error = 0;
-    error = (error ? error : ProcessNode(function1));
-
-    return error;
-}
-
-/* 37. <class-stmt> -> <assignment> <endl> */
-int ReduceClassStmtC(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 2);
-    SYNTAX_TREE* assignment1 = node->children[0];
-
-    int error = 0;
-    error = (error ? error : ProcessNode(assignment1));
-
-    return error;
-}
-
-/* 38. <class-stmt> -> <function> <endl> */
-int ReduceClassStmtD(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 2);
-    SYNTAX_TREE* function1 = node->children[0];
-
-    int error = 0;
-    error = (error ? error : ProcessNode(function1));
-
-    return error;
-}
-
-/* 39. <class-stmt> -> <endl> */
-int ReduceClassStmtE(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 1);
-
-    int error = 0;
-
-    return error;
-}
-
-/* 40. <function> -> func <identifier> <function-def> */
+/* 34. <function> -> func <identifier> <function-def> */
 int ReduceFunctionA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -483,7 +413,7 @@ int ReduceFunctionA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 41. <function> -> func <string> <function-def> */
+/* 35. <function> -> func <string> <function-def> */
 int ReduceFunctionB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -497,7 +427,7 @@ int ReduceFunctionB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 42. <function-def> -> <parameters> <endl> <block> endfunc */
+/* 36. <function-def> -> <parameters> <endl> <block> endfunc */
 int ReduceFunctionDef(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -511,7 +441,7 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
     return error;
 }
 
-/* 43. <parameters> -> ( <identifier-list> ) */
+/* 37. <parameters> -> ( <identifier-list> ) */
 int ReduceParametersA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -523,7 +453,7 @@ int ReduceParametersA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 44. <parameters> -> ( ) */
+/* 38. <parameters> -> ( ) */
 int ReduceParametersB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -533,7 +463,7 @@ int ReduceParametersB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 45. <parameters> -> */
+/* 39. <parameters> -> */
 int ReduceParametersC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 0);
@@ -543,7 +473,7 @@ int ReduceParametersC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 46. <arguments> -> */
+/* 40. <arguments> -> */
 int ReduceArgumentsA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 0);
@@ -553,7 +483,7 @@ int ReduceArgumentsA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 47. <arguments> -> <expr-list> */
+/* 41. <arguments> -> <expr-list> */
 int ReduceArgumentsB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -565,7 +495,7 @@ int ReduceArgumentsB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 48. <expr-list> -> <expr> , <expr-list> */
+/* 42. <expr-list> -> <expr> , <expr-list> */
 int ReduceExprListA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -579,7 +509,7 @@ int ReduceExprListA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 49. <expr-list> -> <expr> */
+/* 43. <expr-list> -> <expr> */
 int ReduceExprListB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -591,7 +521,7 @@ int ReduceExprListB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 50. <if> -> if <condition> then <endl> <block> <elseif> */
+/* 44. <if> -> if <condition> then <endl> <block> <elseif> */
 int ReduceIf(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 6);
@@ -607,7 +537,7 @@ int ReduceIf(SYNTAX_TREE* node)
     return error;
 }
 
-/* 51. <elseif> -> else <endl> <block> endif */
+/* 45. <elseif> -> else <endl> <block> endif */
 int ReduceElseifA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -619,7 +549,7 @@ int ReduceElseifA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 52. <elseif> -> else <if> */
+/* 46. <elseif> -> else <if> */
 int ReduceElseifB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -631,7 +561,7 @@ int ReduceElseifB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 53. <elseif> -> endif */
+/* 47. <elseif> -> endif */
 int ReduceElseifC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -641,7 +571,7 @@ int ReduceElseifC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 54. <for> -> for <identifier> <for-start> */
+/* 48. <for> -> for <identifier> <for-start> */
 int ReduceFor(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -655,7 +585,7 @@ int ReduceFor(SYNTAX_TREE* node)
     return error;
 }
 
-/* 55. <for-start> -> = <arithmetic> to <arithmetic> do <endl> <loop-end> */
+/* 49. <for-start> -> = <arithmetic> to <arithmetic> do <endl> <loop-end> */
 int ReduceForStartA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 7);
@@ -671,7 +601,7 @@ int ReduceForStartA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 56. <for-start> -> = <arithmetic> to <arithmetic> step <arithmetic> do <endl> <loop-end> */
+/* 50. <for-start> -> = <arithmetic> to <arithmetic> step <arithmetic> do <endl> <loop-end> */
 int ReduceForStartB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 9);
@@ -689,21 +619,21 @@ int ReduceForStartB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 57. <for-start> -> in <final> do <endl> <loop-end> */
+/* 51. <for-start> -> in <value> do <endl> <loop-end> */
 int ReduceForStartC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 5);
-    SYNTAX_TREE* final1 = node->children[1];
+    SYNTAX_TREE* value1 = node->children[1];
     SYNTAX_TREE* loop_end1 = node->children[4];
 
     int error = 0;
-    error = (error ? error : ProcessNode(final1));
+    error = (error ? error : ProcessNode(value1));
     error = (error ? error : ProcessNode(loop_end1));
 
     return error;
 }
 
-/* 58. <while> -> while <condition> do <endl> <loop-end> */
+/* 52. <while> -> while <condition> do <endl> <loop-end> */
 int ReduceWhileA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 5);
@@ -717,7 +647,7 @@ int ReduceWhileA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 59. <while> -> do <endl> <block> loop while <condition> */
+/* 53. <while> -> do <endl> <block> loop while <condition> */
 int ReduceWhileB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 6);
@@ -731,7 +661,7 @@ int ReduceWhileB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 60. <loop-end> -> <block> loop */
+/* 54. <loop-end> -> <block> loop */
 int ReduceLoopEnd(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -743,7 +673,7 @@ int ReduceLoopEnd(SYNTAX_TREE* node)
     return error;
 }
 
-/* 61. <let-block> -> let <bindings> <endl> begin <endl> <block> end */
+/* 55. <let-block> -> let <bindings> <endl> begin <endl> <block> end */
 int ReduceLetBlock(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 7);
@@ -757,7 +687,7 @@ int ReduceLetBlock(SYNTAX_TREE* node)
     return error;
 }
 
-/* 62. <bindings> -> <binding> , <optendl> <bindings> */
+/* 56. <bindings> -> <binding> , <optendl> <bindings> */
 int ReduceBindingsA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -773,7 +703,7 @@ int ReduceBindingsA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 63. <bindings> -> <binding> */
+/* 57. <bindings> -> <binding> */
 int ReduceBindingsB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -785,7 +715,7 @@ int ReduceBindingsB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 64. <binding> -> <identifier> = <expr> */
+/* 58. <binding> -> <identifier> = <expr> */
 int ReduceBinding(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -799,7 +729,7 @@ int ReduceBinding(SYNTAX_TREE* node)
     return error;
 }
 
-/* 65. <try-block> -> try <endl> <block> <catch-block> */
+/* 59. <try-block> -> try <endl> <block> <catch-block> */
 int ReduceTryBlock(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -813,7 +743,7 @@ int ReduceTryBlock(SYNTAX_TREE* node)
     return error;
 }
 
-/* 66. <catch-block> -> catch <l-value> <endl> <block> done */
+/* 60. <catch-block> -> catch <l-value> <endl> <block> done */
 int ReduceCatchBlockA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 5);
@@ -827,7 +757,7 @@ int ReduceCatchBlockA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 67. <catch-block> -> done */
+/* 61. <catch-block> -> done */
 int ReduceCatchBlockB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -837,7 +767,7 @@ int ReduceCatchBlockB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 68. <assignment> -> <l-value> = <expr> */
+/* 62. <assignment> -> <l-value> = <expr> */
 int ReduceAssignmentA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -851,7 +781,7 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 69. <assignment> -> <l-value> = <object> */
+/* 63. <assignment> -> <l-value> = <object> */
 int ReduceAssignmentB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -865,7 +795,7 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 70. <self-assignment> -> <l-value> += <arithmetic> */
+/* 64. <self-assignment> -> <l-value> += <arithmetic> */
 int ReduceSelfAssignmentA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -879,7 +809,7 @@ int ReduceSelfAssignmentA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 71. <self-assignment> -> <l-value> -= <arithmetic> */
+/* 65. <self-assignment> -> <l-value> -= <arithmetic> */
 int ReduceSelfAssignmentB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -893,7 +823,7 @@ int ReduceSelfAssignmentB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 72. <self-assignment> -> <l-value> *= <arithmetic> */
+/* 66. <self-assignment> -> <l-value> *= <arithmetic> */
 int ReduceSelfAssignmentC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -907,7 +837,7 @@ int ReduceSelfAssignmentC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 73. <self-assignment> -> <l-value> /= <arithmetic> */
+/* 67. <self-assignment> -> <l-value> /= <arithmetic> */
 int ReduceSelfAssignmentD(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -921,7 +851,7 @@ int ReduceSelfAssignmentD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 74. <self-assignment> -> <l-value> ++ */
+/* 68. <self-assignment> -> <l-value> ++ */
 int ReduceSelfAssignmentE(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -933,7 +863,7 @@ int ReduceSelfAssignmentE(SYNTAX_TREE* node)
     return error;
 }
 
-/* 75. <self-assignment> -> <l-value> -- */
+/* 69. <self-assignment> -> <l-value> -- */
 int ReduceSelfAssignmentF(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -945,7 +875,7 @@ int ReduceSelfAssignmentF(SYNTAX_TREE* node)
     return error;
 }
 
-/* 76. <l-value> -> <identifier> */
+/* 70. <l-value> -> <identifier> */
 int ReduceLValueA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -957,7 +887,7 @@ int ReduceLValueA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 77. <l-value> -> <l-value> [ <arithmetic> ] */
+/* 71. <l-value> -> <l-value> [ <arithmetic> ] */
 int ReduceLValueB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -971,7 +901,7 @@ int ReduceLValueB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 78. <l-value> -> <l-value> . <identifier> */
+/* 72. <l-value> -> <l-value> . <identifier> */
 int ReduceLValueC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -985,7 +915,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 79. <expr> -> <condition> */
+/* 73. <expr> -> <condition> */
 int ReduceExpr(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -997,7 +927,7 @@ int ReduceExpr(SYNTAX_TREE* node)
     return error;
 }
 
-/* 80. <condition> -> <condition> and <logic> */
+/* 74. <condition> -> <condition> and <logic> */
 int ReduceConditionA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1011,7 +941,7 @@ int ReduceConditionA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 81. <condition> -> <condition> or <logic> */
+/* 75. <condition> -> <condition> or <logic> */
 int ReduceConditionB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1025,7 +955,7 @@ int ReduceConditionB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 82. <condition> -> <logic> */
+/* 76. <condition> -> <logic> */
 int ReduceConditionC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1037,7 +967,7 @@ int ReduceConditionC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 83. <logic> -> not <comparison> */
+/* 77. <logic> -> not <comparison> */
 int ReduceLogicA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -1049,7 +979,7 @@ int ReduceLogicA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 84. <logic> -> <comparison> */
+/* 78. <logic> -> <comparison> */
 int ReduceLogicB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1061,7 +991,7 @@ int ReduceLogicB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 85. <comparison> -> <comparison> == <arithmetic> */
+/* 79. <comparison> -> <comparison> == <arithmetic> */
 int ReduceComparisonA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1075,7 +1005,7 @@ int ReduceComparisonA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 86. <comparison> -> <comparison> != <arithmetic> */
+/* 80. <comparison> -> <comparison> != <arithmetic> */
 int ReduceComparisonB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1089,7 +1019,7 @@ int ReduceComparisonB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 87. <comparison> -> <comparison> < <arithmetic> */
+/* 81. <comparison> -> <comparison> < <arithmetic> */
 int ReduceComparisonC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1103,7 +1033,7 @@ int ReduceComparisonC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 88. <comparison> -> <comparison> > <arithmetic> */
+/* 82. <comparison> -> <comparison> > <arithmetic> */
 int ReduceComparisonD(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1117,7 +1047,7 @@ int ReduceComparisonD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 89. <comparison> -> <comparison> <= <arithmetic> */
+/* 83. <comparison> -> <comparison> <= <arithmetic> */
 int ReduceComparisonE(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1131,7 +1061,7 @@ int ReduceComparisonE(SYNTAX_TREE* node)
     return error;
 }
 
-/* 90. <comparison> -> <comparison> >= <arithmetic> */
+/* 84. <comparison> -> <comparison> >= <arithmetic> */
 int ReduceComparisonF(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1145,35 +1075,35 @@ int ReduceComparisonF(SYNTAX_TREE* node)
     return error;
 }
 
-/* 91. <comparison> -> <final> is <l-value> */
+/* 85. <comparison> -> <value> is <l-value> */
 int ReduceComparisonG(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
-    SYNTAX_TREE* final1 = node->children[0];
+    SYNTAX_TREE* value1 = node->children[0];
     SYNTAX_TREE* l_value1 = node->children[2];
 
     int error = 0;
-    error = (error ? error : ProcessNode(final1));
+    error = (error ? error : ProcessNode(value1));
     error = (error ? error : ProcessNode(l_value1));
 
     return error;
 }
 
-/* 92. <comparison> -> <final> is not <l-value> */
+/* 86. <comparison> -> <value> is not <l-value> */
 int ReduceComparisonH(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
-    SYNTAX_TREE* final1 = node->children[0];
+    SYNTAX_TREE* value1 = node->children[0];
     SYNTAX_TREE* l_value1 = node->children[3];
 
     int error = 0;
-    error = (error ? error : ProcessNode(final1));
+    error = (error ? error : ProcessNode(value1));
     error = (error ? error : ProcessNode(l_value1));
 
     return error;
 }
 
-/* 93. <comparison> -> <arithmetic> */
+/* 87. <comparison> -> <arithmetic> */
 int ReduceComparisonI(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1185,7 +1115,7 @@ int ReduceComparisonI(SYNTAX_TREE* node)
     return error;
 }
 
-/* 94. <arithmetic> -> <arithmetic> + <term> */
+/* 88. <arithmetic> -> <arithmetic> + <term> */
 int ReduceArithmeticA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1199,7 +1129,7 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 95. <arithmetic> -> <arithmetic> - <term> */
+/* 89. <arithmetic> -> <arithmetic> - <term> */
 int ReduceArithmeticB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1213,7 +1143,7 @@ int ReduceArithmeticB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 96. <arithmetic> -> <term> */
+/* 90. <arithmetic> -> <term> */
 int ReduceArithmeticC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1225,7 +1155,7 @@ int ReduceArithmeticC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 97. <term> -> <term> * <factor> */
+/* 91. <term> -> <term> * <factor> */
 int ReduceTermA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1239,7 +1169,7 @@ int ReduceTermA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 98. <term> -> <term> / <factor> */
+/* 92. <term> -> <term> / <factor> */
 int ReduceTermB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1253,7 +1183,7 @@ int ReduceTermB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 99. <term> -> <term> mod <factor> */
+/* 93. <term> -> <term> mod <factor> */
 int ReduceTermC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1267,7 +1197,7 @@ int ReduceTermC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 100. <term> -> <factor> */
+/* 94. <term> -> <factor> */
 int ReduceTermD(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1279,7 +1209,7 @@ int ReduceTermD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 101. <factor> -> - <value> */
+/* 95. <factor> -> - <value> */
 int ReduceFactorA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -1291,7 +1221,7 @@ int ReduceFactorA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 102. <factor> -> ! <value> */
+/* 96. <factor> -> ! <value> */
 int ReduceFactorB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -1303,7 +1233,7 @@ int ReduceFactorB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 103. <factor> -> <value> */
+/* 97. <factor> -> <value> */
 int ReduceFactorC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1315,7 +1245,7 @@ int ReduceFactorC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 104. <value> -> <primitive> */
+/* 98. <value> -> <primitive> */
 int ReduceValueA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1327,7 +1257,7 @@ int ReduceValueA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 105. <value> -> <l-value> */
+/* 99. <value> -> <l-value> */
 int ReduceValueB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1339,7 +1269,7 @@ int ReduceValueB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 106. <value> -> <l-value> ( <arguments> ) */
+/* 100. <value> -> <l-value> ( <arguments> ) */
 int ReduceValueC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -1353,22 +1283,8 @@ int ReduceValueC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 107. <value> -> new <l-value> ( <arguments> ) */
+/* 101. <value> -> ( <expr> ) */
 int ReduceValueD(SYNTAX_TREE* node)
-{
-    Assert(node->numChildren == 5);
-    SYNTAX_TREE* l_value1 = node->children[1];
-    SYNTAX_TREE* arguments1 = node->children[3];
-
-    int error = 0;
-    error = (error ? error : ProcessNode(l_value1));
-    error = (error ? error : ProcessNode(arguments1));
-
-    return error;
-}
-
-/* 108. <value> -> ( <expr> ) */
-int ReduceValueE(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
     SYNTAX_TREE* expr1 = node->children[1];
@@ -1379,7 +1295,7 @@ int ReduceValueE(SYNTAX_TREE* node)
     return error;
 }
 
-/* 109. <primitive> -> true */
+/* 102. <primitive> -> true */
 int ReducePrimitiveA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1389,7 +1305,7 @@ int ReducePrimitiveA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 110. <primitive> -> false */
+/* 103. <primitive> -> false */
 int ReducePrimitiveB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1399,7 +1315,7 @@ int ReducePrimitiveB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 111. <primitive> -> <integer> */
+/* 104. <primitive> -> <integer> */
 int ReducePrimitiveC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1411,7 +1327,7 @@ int ReducePrimitiveC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 112. <primitive> -> <float> */
+/* 105. <primitive> -> <float> */
 int ReducePrimitiveD(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1423,7 +1339,7 @@ int ReducePrimitiveD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 113. <primitive> -> <string> */
+/* 106. <primitive> -> <string> */
 int ReducePrimitiveE(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 1);
@@ -1435,7 +1351,7 @@ int ReducePrimitiveE(SYNTAX_TREE* node)
     return error;
 }
 
-/* 114. <object> -> [ <optendl> ] */
+/* 107. <object> -> [ <optendl> ] */
 int ReduceObjectA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1447,7 +1363,7 @@ int ReduceObjectA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 115. <object> -> [ <optendl> <array-init> */
+/* 108. <object> -> [ <optendl> <array-init> */
 int ReduceObjectB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1461,7 +1377,7 @@ int ReduceObjectB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 116. <object> -> [ <optendl> <dictionary-init> */
+/* 109. <object> -> [ <optendl> <dictionary-init> */
 int ReduceObjectC(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1475,7 +1391,7 @@ int ReduceObjectC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 117. <array-init> -> <expr> , <optendl> <array-init> */
+/* 110. <array-init> -> <expr> , <optendl> <array-init> */
 int ReduceArrayInitA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -1491,7 +1407,7 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 118. <array-init> -> <expr> <optendl> ] */
+/* 111. <array-init> -> <expr> <optendl> ] */
 int ReduceArrayInitB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
@@ -1505,7 +1421,7 @@ int ReduceArrayInitB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 119. <dictionary-init> -> <dictionary-entry> , <optendl> <dictionary-init> */
+/* 112. <dictionary-init> -> <dictionary-entry> , <optendl> <dictionary-init> */
 int ReduceDictionaryInitA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -1521,7 +1437,7 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 120. <dictionary-init> -> <dictionary-entry> ] */
+/* 113. <dictionary-init> -> <dictionary-entry> ] */
 int ReduceDictionaryInitB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -1533,7 +1449,7 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 121. <dictionary-entry> -> <identifier> : <optendl> <expr> */
+/* 114. <dictionary-entry> -> <identifier> : <optendl> <expr> */
 int ReduceDictionaryEntry(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -1586,98 +1502,91 @@ int ProcessNode(SYNTAX_TREE* node)
         case 0x1B: return ReduceStmtN(node);
         case 0x1C: return ReduceStmtO(node);
         case 0x1D: return ReduceStmtP(node);
-        case 0x1E: return ReduceClassA(node);
-        case 0x1F: return ReduceClassB(node);
-        case 0x20: return ReduceClassBody(node);
-        case 0x21: return ReduceClassBlockA(node);
-        case 0x22: return ReduceClassBlockB(node);
-        case 0x23: return ReduceClassStmtA(node);
-        case 0x24: return ReduceClassStmtB(node);
-        case 0x25: return ReduceClassStmtC(node);
-        case 0x26: return ReduceClassStmtD(node);
-        case 0x27: return ReduceClassStmtE(node);
-        case 0x28: return ReduceFunctionA(node);
-        case 0x29: return ReduceFunctionB(node);
-        case 0x2A: return ReduceFunctionDef(node);
-        case 0x2B: return ReduceParametersA(node);
-        case 0x2C: return ReduceParametersB(node);
-        case 0x2D: return ReduceParametersC(node);
-        case 0x2E: return ReduceArgumentsA(node);
-        case 0x2F: return ReduceArgumentsB(node);
-        case 0x30: return ReduceExprListA(node);
-        case 0x31: return ReduceExprListB(node);
-        case 0x32: return ReduceIf(node);
-        case 0x33: return ReduceElseifA(node);
-        case 0x34: return ReduceElseifB(node);
-        case 0x35: return ReduceElseifC(node);
-        case 0x36: return ReduceFor(node);
-        case 0x37: return ReduceForStartA(node);
-        case 0x38: return ReduceForStartB(node);
-        case 0x39: return ReduceForStartC(node);
-        case 0x3A: return ReduceWhileA(node);
-        case 0x3B: return ReduceWhileB(node);
-        case 0x3C: return ReduceLoopEnd(node);
-        case 0x3D: return ReduceLetBlock(node);
-        case 0x3E: return ReduceBindingsA(node);
-        case 0x3F: return ReduceBindingsB(node);
-        case 0x40: return ReduceBinding(node);
-        case 0x41: return ReduceTryBlock(node);
-        case 0x42: return ReduceCatchBlockA(node);
-        case 0x43: return ReduceCatchBlockB(node);
-        case 0x44: return ReduceAssignmentA(node);
-        case 0x45: return ReduceAssignmentB(node);
-        case 0x46: return ReduceSelfAssignmentA(node);
-        case 0x47: return ReduceSelfAssignmentB(node);
-        case 0x48: return ReduceSelfAssignmentC(node);
-        case 0x49: return ReduceSelfAssignmentD(node);
-        case 0x4A: return ReduceSelfAssignmentE(node);
-        case 0x4B: return ReduceSelfAssignmentF(node);
-        case 0x4C: return ReduceLValueA(node);
-        case 0x4D: return ReduceLValueB(node);
-        case 0x4E: return ReduceLValueC(node);
-        case 0x4F: return ReduceExpr(node);
-        case 0x50: return ReduceConditionA(node);
-        case 0x51: return ReduceConditionB(node);
-        case 0x52: return ReduceConditionC(node);
-        case 0x53: return ReduceLogicA(node);
-        case 0x54: return ReduceLogicB(node);
-        case 0x55: return ReduceComparisonA(node);
-        case 0x56: return ReduceComparisonB(node);
-        case 0x57: return ReduceComparisonC(node);
-        case 0x58: return ReduceComparisonD(node);
-        case 0x59: return ReduceComparisonE(node);
-        case 0x5A: return ReduceComparisonF(node);
-        case 0x5B: return ReduceComparisonG(node);
-        case 0x5C: return ReduceComparisonH(node);
-        case 0x5D: return ReduceComparisonI(node);
-        case 0x5E: return ReduceArithmeticA(node);
-        case 0x5F: return ReduceArithmeticB(node);
-        case 0x60: return ReduceArithmeticC(node);
-        case 0x61: return ReduceTermA(node);
-        case 0x62: return ReduceTermB(node);
-        case 0x63: return ReduceTermC(node);
-        case 0x64: return ReduceTermD(node);
-        case 0x65: return ReduceFactorA(node);
-        case 0x66: return ReduceFactorB(node);
-        case 0x67: return ReduceFactorC(node);
-        case 0x68: return ReduceValueA(node);
-        case 0x69: return ReduceValueB(node);
-        case 0x6A: return ReduceValueC(node);
-        case 0x6B: return ReduceValueD(node);
-        case 0x6C: return ReduceValueE(node);
-        case 0x6D: return ReducePrimitiveA(node);
-        case 0x6E: return ReducePrimitiveB(node);
-        case 0x6F: return ReducePrimitiveC(node);
-        case 0x70: return ReducePrimitiveD(node);
-        case 0x71: return ReducePrimitiveE(node);
-        case 0x72: return ReduceObjectA(node);
-        case 0x73: return ReduceObjectB(node);
-        case 0x74: return ReduceObjectC(node);
-        case 0x75: return ReduceArrayInitA(node);
-        case 0x76: return ReduceArrayInitB(node);
-        case 0x77: return ReduceDictionaryInitA(node);
-        case 0x78: return ReduceDictionaryInitB(node);
-        case 0x79: return ReduceDictionaryEntry(node);
+        case 0x1E: return ReduceClass(node);
+        case 0x1F: return ReduceClassExtA(node);
+        case 0x20: return ReduceClassExtB(node);
+        case 0x21: return ReduceClassBody(node);
+        case 0x22: return ReduceFunctionA(node);
+        case 0x23: return ReduceFunctionB(node);
+        case 0x24: return ReduceFunctionDef(node);
+        case 0x25: return ReduceParametersA(node);
+        case 0x26: return ReduceParametersB(node);
+        case 0x27: return ReduceParametersC(node);
+        case 0x28: return ReduceArgumentsA(node);
+        case 0x29: return ReduceArgumentsB(node);
+        case 0x2A: return ReduceExprListA(node);
+        case 0x2B: return ReduceExprListB(node);
+        case 0x2C: return ReduceIf(node);
+        case 0x2D: return ReduceElseifA(node);
+        case 0x2E: return ReduceElseifB(node);
+        case 0x2F: return ReduceElseifC(node);
+        case 0x30: return ReduceFor(node);
+        case 0x31: return ReduceForStartA(node);
+        case 0x32: return ReduceForStartB(node);
+        case 0x33: return ReduceForStartC(node);
+        case 0x34: return ReduceWhileA(node);
+        case 0x35: return ReduceWhileB(node);
+        case 0x36: return ReduceLoopEnd(node);
+        case 0x37: return ReduceLetBlock(node);
+        case 0x38: return ReduceBindingsA(node);
+        case 0x39: return ReduceBindingsB(node);
+        case 0x3A: return ReduceBinding(node);
+        case 0x3B: return ReduceTryBlock(node);
+        case 0x3C: return ReduceCatchBlockA(node);
+        case 0x3D: return ReduceCatchBlockB(node);
+        case 0x3E: return ReduceAssignmentA(node);
+        case 0x3F: return ReduceAssignmentB(node);
+        case 0x40: return ReduceSelfAssignmentA(node);
+        case 0x41: return ReduceSelfAssignmentB(node);
+        case 0x42: return ReduceSelfAssignmentC(node);
+        case 0x43: return ReduceSelfAssignmentD(node);
+        case 0x44: return ReduceSelfAssignmentE(node);
+        case 0x45: return ReduceSelfAssignmentF(node);
+        case 0x46: return ReduceLValueA(node);
+        case 0x47: return ReduceLValueB(node);
+        case 0x48: return ReduceLValueC(node);
+        case 0x49: return ReduceExpr(node);
+        case 0x4A: return ReduceConditionA(node);
+        case 0x4B: return ReduceConditionB(node);
+        case 0x4C: return ReduceConditionC(node);
+        case 0x4D: return ReduceLogicA(node);
+        case 0x4E: return ReduceLogicB(node);
+        case 0x4F: return ReduceComparisonA(node);
+        case 0x50: return ReduceComparisonB(node);
+        case 0x51: return ReduceComparisonC(node);
+        case 0x52: return ReduceComparisonD(node);
+        case 0x53: return ReduceComparisonE(node);
+        case 0x54: return ReduceComparisonF(node);
+        case 0x55: return ReduceComparisonG(node);
+        case 0x56: return ReduceComparisonH(node);
+        case 0x57: return ReduceComparisonI(node);
+        case 0x58: return ReduceArithmeticA(node);
+        case 0x59: return ReduceArithmeticB(node);
+        case 0x5A: return ReduceArithmeticC(node);
+        case 0x5B: return ReduceTermA(node);
+        case 0x5C: return ReduceTermB(node);
+        case 0x5D: return ReduceTermC(node);
+        case 0x5E: return ReduceTermD(node);
+        case 0x5F: return ReduceFactorA(node);
+        case 0x60: return ReduceFactorB(node);
+        case 0x61: return ReduceFactorC(node);
+        case 0x62: return ReduceValueA(node);
+        case 0x63: return ReduceValueB(node);
+        case 0x64: return ReduceValueC(node);
+        case 0x65: return ReduceValueD(node);
+        case 0x66: return ReducePrimitiveA(node);
+        case 0x67: return ReducePrimitiveB(node);
+        case 0x68: return ReducePrimitiveC(node);
+        case 0x69: return ReducePrimitiveD(node);
+        case 0x6A: return ReducePrimitiveE(node);
+        case 0x6B: return ReduceObjectA(node);
+        case 0x6C: return ReduceObjectB(node);
+        case 0x6D: return ReduceObjectC(node);
+        case 0x6E: return ReduceArrayInitA(node);
+        case 0x6F: return ReduceArrayInitB(node);
+        case 0x70: return ReduceDictionaryInitA(node);
+        case 0x71: return ReduceDictionaryInitB(node);
+        case 0x72: return ReduceDictionaryEntry(node);
     default:
         printf("Unknown production %i.\n", node->production);
         return 1;
