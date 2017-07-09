@@ -105,69 +105,70 @@ int ProcessNode(SYNTAX_TREE* node);
 #define PROD_FOR_START_A                            0x0031
 #define PROD_FOR_START_B                            0x0032
 #define PROD_FOR_START_IN                           0x0033
-#define PROD_WHILE_WHILE                            0x0034
-#define PROD_WHILE_DO                               0x0035
-#define PROD_LOOP_END_BLOCK                         0x0036
-#define PROD_LET_BLOCK_LET                          0x0037
-#define PROD_BINDINGS_BINDING_A                     0x0038
-#define PROD_BINDINGS_BINDING_B                     0x0039
-#define PROD_BINDING_IDENTIFIER                     0x003A
-#define PROD_TRY_BLOCK_TRY                          0x003B
-#define PROD_CATCH_BLOCK_CATCH                      0x003C
-#define PROD_CATCH_BLOCK_DONE                       0x003D
-#define PROD_ASSIGNMENT_L_VALUE_A                   0x003E
-#define PROD_ASSIGNMENT_L_VALUE_B                   0x003F
-#define PROD_SELF_ASSIGNMENT_L_VALUE_A              0x0040
-#define PROD_SELF_ASSIGNMENT_L_VALUE_B              0x0041
-#define PROD_SELF_ASSIGNMENT_L_VALUE_C              0x0042
-#define PROD_SELF_ASSIGNMENT_L_VALUE_D              0x0043
-#define PROD_SELF_ASSIGNMENT_L_VALUE_E              0x0044
-#define PROD_SELF_ASSIGNMENT_L_VALUE_F              0x0045
-#define PROD_L_VALUE_IDENTIFIER                     0x0046
-#define PROD_L_VALUE_L_VALUE_A                      0x0047
-#define PROD_L_VALUE_L_VALUE_B                      0x0048
-#define PROD_EXPR_CONDITION                         0x0049
-#define PROD_CONDITION_CONDITION_A                  0x004A
-#define PROD_CONDITION_CONDITION_B                  0x004B
-#define PROD_CONDITION_LOGIC                        0x004C
-#define PROD_LOGIC_NOT                              0x004D
-#define PROD_LOGIC_COMPARISON                       0x004E
-#define PROD_COMPARISON_COMPARISON_A                0x004F
-#define PROD_COMPARISON_COMPARISON_B                0x0050
-#define PROD_COMPARISON_COMPARISON_C                0x0051
-#define PROD_COMPARISON_COMPARISON_D                0x0052
-#define PROD_COMPARISON_COMPARISON_E                0x0053
-#define PROD_COMPARISON_COMPARISON_F                0x0054
-#define PROD_COMPARISON_VALUE_A                     0x0055
-#define PROD_COMPARISON_VALUE_B                     0x0056
-#define PROD_COMPARISON_ARITHMETIC                  0x0057
-#define PROD_ARITHMETIC_ARITHMETIC_A                0x0058
-#define PROD_ARITHMETIC_ARITHMETIC_B                0x0059
-#define PROD_ARITHMETIC_TERM                        0x005A
-#define PROD_TERM_TERM_A                            0x005B
-#define PROD_TERM_TERM_B                            0x005C
-#define PROD_TERM_TERM_C                            0x005D
-#define PROD_TERM_FACTOR                            0x005E
-#define PROD_FACTOR_A                               0x005F
-#define PROD_FACTOR_B                               0x0060
-#define PROD_FACTOR_VALUE                           0x0061
-#define PROD_VALUE_PRIMITIVE                        0x0062
-#define PROD_VALUE_L_VALUE_A                        0x0063
-#define PROD_VALUE_L_VALUE_B                        0x0064
-#define PROD_VALUE                                  0x0065
-#define PROD_PRIMITIVE_TRUE                         0x0066
-#define PROD_PRIMITIVE_FALSE                        0x0067
-#define PROD_PRIMITIVE_INTEGER                      0x0068
-#define PROD_PRIMITIVE_FLOAT                        0x0069
-#define PROD_PRIMITIVE_STRING                       0x006A
-#define PROD_OBJECT_A                               0x006B
-#define PROD_OBJECT_B                               0x006C
-#define PROD_OBJECT_C                               0x006D
-#define PROD_ARRAY_INIT_EXPR_A                      0x006E
-#define PROD_ARRAY_INIT_EXPR_B                      0x006F
-#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_A     0x0070
-#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_B     0x0071
-#define PROD_DICTIONARY_ENTRY_IDENTIFIER            0x0072
+#define PROD_FOR_START_C                            0x0034
+#define PROD_WHILE_WHILE                            0x0035
+#define PROD_WHILE_DO                               0x0036
+#define PROD_LOOP_END_BLOCK                         0x0037
+#define PROD_LET_BLOCK_LET                          0x0038
+#define PROD_BINDINGS_BINDING_A                     0x0039
+#define PROD_BINDINGS_BINDING_B                     0x003A
+#define PROD_BINDING_IDENTIFIER                     0x003B
+#define PROD_TRY_BLOCK_TRY                          0x003C
+#define PROD_CATCH_BLOCK_CATCH                      0x003D
+#define PROD_CATCH_BLOCK_DONE                       0x003E
+#define PROD_ASSIGNMENT_L_VALUE_A                   0x003F
+#define PROD_ASSIGNMENT_L_VALUE_B                   0x0040
+#define PROD_SELF_ASSIGNMENT_L_VALUE_A              0x0041
+#define PROD_SELF_ASSIGNMENT_L_VALUE_B              0x0042
+#define PROD_SELF_ASSIGNMENT_L_VALUE_C              0x0043
+#define PROD_SELF_ASSIGNMENT_L_VALUE_D              0x0044
+#define PROD_SELF_ASSIGNMENT_L_VALUE_E              0x0045
+#define PROD_SELF_ASSIGNMENT_L_VALUE_F              0x0046
+#define PROD_L_VALUE_IDENTIFIER                     0x0047
+#define PROD_L_VALUE_L_VALUE_A                      0x0048
+#define PROD_L_VALUE_L_VALUE_B                      0x0049
+#define PROD_EXPR_CONDITION                         0x004A
+#define PROD_CONDITION_CONDITION_A                  0x004B
+#define PROD_CONDITION_CONDITION_B                  0x004C
+#define PROD_CONDITION_LOGIC                        0x004D
+#define PROD_LOGIC_NOT                              0x004E
+#define PROD_LOGIC_COMPARISON                       0x004F
+#define PROD_COMPARISON_COMPARISON_A                0x0050
+#define PROD_COMPARISON_COMPARISON_B                0x0051
+#define PROD_COMPARISON_COMPARISON_C                0x0052
+#define PROD_COMPARISON_COMPARISON_D                0x0053
+#define PROD_COMPARISON_COMPARISON_E                0x0054
+#define PROD_COMPARISON_COMPARISON_F                0x0055
+#define PROD_COMPARISON_VALUE_A                     0x0056
+#define PROD_COMPARISON_VALUE_B                     0x0057
+#define PROD_COMPARISON_ARITHMETIC                  0x0058
+#define PROD_ARITHMETIC_ARITHMETIC_A                0x0059
+#define PROD_ARITHMETIC_ARITHMETIC_B                0x005A
+#define PROD_ARITHMETIC_TERM                        0x005B
+#define PROD_TERM_TERM_A                            0x005C
+#define PROD_TERM_TERM_B                            0x005D
+#define PROD_TERM_TERM_C                            0x005E
+#define PROD_TERM_FACTOR                            0x005F
+#define PROD_FACTOR_A                               0x0060
+#define PROD_FACTOR_B                               0x0061
+#define PROD_FACTOR_VALUE                           0x0062
+#define PROD_VALUE_PRIMITIVE                        0x0063
+#define PROD_VALUE_L_VALUE_A                        0x0064
+#define PROD_VALUE_L_VALUE_B                        0x0065
+#define PROD_VALUE                                  0x0066
+#define PROD_PRIMITIVE_TRUE                         0x0067
+#define PROD_PRIMITIVE_FALSE                        0x0068
+#define PROD_PRIMITIVE_INTEGER                      0x0069
+#define PROD_PRIMITIVE_FLOAT                        0x006A
+#define PROD_PRIMITIVE_STRING                       0x006B
+#define PROD_OBJECT_A                               0x006C
+#define PROD_OBJECT_B                               0x006D
+#define PROD_OBJECT_C                               0x006E
+#define PROD_ARRAY_INIT_EXPR_A                      0x006F
+#define PROD_ARRAY_INIT_EXPR_B                      0x0070
+#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_A     0x0071
+#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_B     0x0072
+#define PROD_DICTIONARY_ENTRY_IDENTIFIER            0x0073
 
 
 /* Grammar Symbols */
@@ -182,11 +183,11 @@ extern GRAMMAR_TABLE CONTEXT_FREE_GRAMMAR;
 
 
 /* SLR GOTO table */
-extern int GOTO_TABLE[10794];
+extern int GOTO_TABLE[11088];
 
 
 /* SLR ACTION table */
-extern ACTION ACTION_TABLE[17733];
+extern ACTION ACTION_TABLE[18216];
 
 
 /* SLR parse table struct */

@@ -359,6 +359,15 @@ function ForStartC(subtree) {
 }
 
 
+// <for-start> -> , <identifier> in <value> do <endl> <loop-end> 
+function ForStartD(subtree) {
+	identifier1 = subtree.child[1].string;
+	CMD_SEQUENCE.push([Dispatch, subtree.child[3]]);	// <value>
+	CMD_SEQUENCE.push([Dispatch, subtree.child[6]]);	// <loop-end>
+	return;
+}
+
+
 // <while> -> while <condition> do <endl> <loop-end> 
 function WhileA(subtree) {
 	CMD_SEQUENCE.push([Dispatch, subtree.child[1]]);	// <condition>
@@ -839,5 +848,5 @@ function DictionaryEntry(subtree) {
 
 
 /* function table */
-_DISPATCH = [null, Program, TopLevelBlockA, null, IdentifierListA, IdentifierListB, null, null, TopLevelStmtA, TopLevelStmtB, TopLevelStmtC, TopLevelStmtD, BlockA, null, StmtA, StmtB, StmtC, StmtD, StmtE, StmtF, StmtG, StmtH, StmtI, StmtJ, StmtK, StmtL, StmtM, StmtN, StmtO, null, Class, ClassExtA, ClassExtB, ClassBody, FunctionA, FunctionB, FunctionDef, ParametersA, ParametersB, null, null, ArgumentsB, ExprListA, ExprListB, If, ElseifA, ElseifB, ElseifC, For, ForStartA, ForStartB, ForStartC, WhileA, WhileB, LoopEnd, LetBlock, BindingsA, BindingsB, Binding, TryBlock, CatchBlockA, CatchBlockB, AssignmentA, AssignmentB, SelfAssignmentA, SelfAssignmentB, SelfAssignmentC, SelfAssignmentD, SelfAssignmentE, SelfAssignmentF, LValueA, LValueB, LValueC, Expr, ConditionA, ConditionB, ConditionC, LogicA, LogicB, ComparisonA, ComparisonB, ComparisonC, ComparisonD, ComparisonE, ComparisonF, ComparisonG, ComparisonH, ComparisonI, ArithmeticA, ArithmeticB, ArithmeticC, TermA, TermB, TermC, TermD, FactorA, FactorB, FactorC, ValueA, ValueB, ValueC, ValueD, PrimitiveA, PrimitiveB, PrimitiveC, PrimitiveD, PrimitiveE, ObjectA, ObjectB, ObjectC, ArrayInitA, ArrayInitB, DictionaryInitA, DictionaryInitB, DictionaryEntry];
+_DISPATCH = [null, Program, TopLevelBlockA, null, IdentifierListA, IdentifierListB, null, null, TopLevelStmtA, TopLevelStmtB, TopLevelStmtC, TopLevelStmtD, BlockA, null, StmtA, StmtB, StmtC, StmtD, StmtE, StmtF, StmtG, StmtH, StmtI, StmtJ, StmtK, StmtL, StmtM, StmtN, StmtO, null, Class, ClassExtA, ClassExtB, ClassBody, FunctionA, FunctionB, FunctionDef, ParametersA, ParametersB, null, null, ArgumentsB, ExprListA, ExprListB, If, ElseifA, ElseifB, ElseifC, For, ForStartA, ForStartB, ForStartC, ForStartD, WhileA, WhileB, LoopEnd, LetBlock, BindingsA, BindingsB, Binding, TryBlock, CatchBlockA, CatchBlockB, AssignmentA, AssignmentB, SelfAssignmentA, SelfAssignmentB, SelfAssignmentC, SelfAssignmentD, SelfAssignmentE, SelfAssignmentF, LValueA, LValueB, LValueC, Expr, ConditionA, ConditionB, ConditionC, LogicA, LogicB, ComparisonA, ComparisonB, ComparisonC, ComparisonD, ComparisonE, ComparisonF, ComparisonG, ComparisonH, ComparisonI, ArithmeticA, ArithmeticB, ArithmeticC, TermA, TermB, TermC, TermD, FactorA, FactorB, FactorC, ValueA, ValueB, ValueC, ValueD, PrimitiveA, PrimitiveB, PrimitiveC, PrimitiveD, PrimitiveE, ObjectA, ObjectB, ObjectC, ArrayInitA, ArrayInitB, DictionaryInitA, DictionaryInitB, DictionaryEntry];
 

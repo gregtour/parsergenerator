@@ -168,3 +168,163 @@ loop
 endmodule
 ####
 
+/*
+Example of each language feature.
+Testing out the formatting and highlighting.
+*/
+module TestCode
+/*
+This is an example of a class.
+It extends two other classes.
+*/
+class Main() extends UnitTest, OtherTest
+x = 2
+;; run all tests
+func RunTests
+for i = 1 to 10 do
+RunTest(i)
+loop
+endfunc
+
+// run one of a few tests
+func RunTest(testNum)
+duck.println(testNum)
+endfunc
+endclass
+
+# the main function
+func Main
+x = 20
+// this tests multiple if then else if
+if x > 10 then
+print("greater than")
+else if x < -10 then
+print("less than")
+else
+print("middle")
+endif
+
+// this is what a while loop looks like
+while x > 10 do
+print(x)
+x -= 3
+loop
+
+// now a for loop
+print("Count by 2.")
+for i = 2 to 10 step 2 do
+print(i)
+loop
+
+/* do while loop -
+also testing multiline
+comment indents */
+do
+/* leading inline comment */ foo()
+bar() /* trailing inline comment */
+; break / continue / return
+if stop() then
+break
+else if dontStop() then
+continue
+else if quitFunction() then
+return 2
+endif
+loop while test() 
+
+// single line let expression
+let a=2.4, b=4
+begin
+print(a+b)
+end
+
+// multiple line let expression
+let x = "hello",
+y = "world",
+z = "!"
+begin
+print(x + ", " + y + z)
+end
+
+// exception handling
+try
+x = 1 / 0.0
+Throw "That should have thrown an exception."
+catch e
+print(e)
+done
+
+// avoid exception without catch
+try
+x = 0 / 0
+done
+
+// testing mod, and, or, not, true, false
+if 11 mod 2 and 4 < 5 or 5 > 4 and True or not False then
+print("true story")
+endif
+
+// is keyword
+if x is number then
+print("x is a number")
+else
+print('x is not a number')
+endif
+
+// objects and arrays
+myArray = [1, 2, 3, 4, 5]
+myObject = [a: 2, b: 3, c: 4]
+myMultilineObject = [
+a: 2,
+b: 3,
+c: 4,
+d: [1, 2, 3]
+]
+myNestedObject = [
+[
+value: 2,
+type: "number"
+], [
+type: "object",
+value: [
+name: "obj",
+count: 3
+]],
+[value: [1,2,3], 
+type: "array"],
+[
+value: "hello world",
+type: "string"
+]
+]
+
+object = [
+name: "bob",
+type: "sprite"
+/* the end -
+or is it */ ]
+endfunc
+endmodule
+
+for k, v in iterable do
+  print(k + ", " + v)
+loop
+
+// duck
+func main( )
+  numbers = []
+  for i = 2 to 1000 do
+    numbers[i] = 1
+  loop
+  for i = 2 to 1000 do
+    if numbers[i] == 1 then
+      numbers[i] = 0
+      for j = 2 to 1000/i do
+        numbers[i*j] = 0
+      loop
+      duck.print(i)
+    endif
+  loop
+endfunc
+
+main()

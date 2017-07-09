@@ -907,9 +907,9 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
         }
     }
     
-    if (shiftReduceConflicts)
+    //if (shiftReduceConflicts)
         printf("%i shift/reduce conflicts.\n", shiftReduceConflicts);
-    if (reduceReduceConflicts)
+    //if (reduceReduceConflicts)
         printf("%i reduce/reduce conflicts.\n", reduceReduceConflicts);
     
     return table;
