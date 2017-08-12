@@ -1407,37 +1407,61 @@ int ReduceObjectC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 111. <array-init> -> <expr> , <optendl> <array-init> */
+/* 111. <object-expr> -> <object> */
+int ReduceObjectExprA(SYNTAX_TREE* node)
+{
+    Assert(node->numChildren == 1);
+    SYNTAX_TREE* object1 = node->children[0];
+
+    int error = 0;
+    error = (error ? error : ProcessNode(object1));
+
+    return error;
+}
+
+/* 112. <object-expr> -> <expr> */
+int ReduceObjectExprB(SYNTAX_TREE* node)
+{
+    Assert(node->numChildren == 1);
+    SYNTAX_TREE* expr1 = node->children[0];
+
+    int error = 0;
+    error = (error ? error : ProcessNode(expr1));
+
+    return error;
+}
+
+/* 113. <array-init> -> <object-expr> , <optendl> <array-init> */
 int ReduceArrayInitA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
-    SYNTAX_TREE* expr1 = node->children[0];
+    SYNTAX_TREE* object_expr1 = node->children[0];
     SYNTAX_TREE* optendl1 = node->children[2];
     SYNTAX_TREE* array_init1 = node->children[3];
 
     int error = 0;
-    error = (error ? error : ProcessNode(expr1));
+    error = (error ? error : ProcessNode(object_expr1));
     error = (error ? error : ProcessNode(optendl1));
     error = (error ? error : ProcessNode(array_init1));
 
     return error;
 }
 
-/* 112. <array-init> -> <expr> <optendl> ] */
+/* 114. <array-init> -> <object-expr> <optendl> ] */
 int ReduceArrayInitB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 3);
-    SYNTAX_TREE* expr1 = node->children[0];
+    SYNTAX_TREE* object_expr1 = node->children[0];
     SYNTAX_TREE* optendl1 = node->children[1];
 
     int error = 0;
-    error = (error ? error : ProcessNode(expr1));
+    error = (error ? error : ProcessNode(object_expr1));
     error = (error ? error : ProcessNode(optendl1));
 
     return error;
 }
 
-/* 113. <dictionary-init> -> <dictionary-entry> , <optendl> <dictionary-init> */
+/* 115. <dictionary-init> -> <dictionary-entry> , <optendl> <dictionary-init> */
 int ReduceDictionaryInitA(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
@@ -1453,7 +1477,7 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 114. <dictionary-init> -> <dictionary-entry> ] */
+/* 116. <dictionary-init> -> <dictionary-entry> ] */
 int ReduceDictionaryInitB(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 2);
@@ -1465,18 +1489,18 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 115. <dictionary-entry> -> <identifier> : <optendl> <expr> */
+/* 117. <dictionary-entry> -> <identifier> : <optendl> <object-expr> */
 int ReduceDictionaryEntry(SYNTAX_TREE* node)
 {
     Assert(node->numChildren == 4);
     SYNTAX_TREE* identifier1 = node->children[0];
     SYNTAX_TREE* optendl1 = node->children[2];
-    SYNTAX_TREE* expr1 = node->children[3];
+    SYNTAX_TREE* object_expr1 = node->children[3];
 
     int error = 0;
     error = (error ? error : ProcessNode(identifier1));
     error = (error ? error : ProcessNode(optendl1));
-    error = (error ? error : ProcessNode(expr1));
+    error = (error ? error : ProcessNode(object_expr1));
 
     return error;
 }
@@ -1599,11 +1623,13 @@ int ProcessNode(SYNTAX_TREE* node)
         case 0x6C: return ReduceObjectA(node);
         case 0x6D: return ReduceObjectB(node);
         case 0x6E: return ReduceObjectC(node);
-        case 0x6F: return ReduceArrayInitA(node);
-        case 0x70: return ReduceArrayInitB(node);
-        case 0x71: return ReduceDictionaryInitA(node);
-        case 0x72: return ReduceDictionaryInitB(node);
-        case 0x73: return ReduceDictionaryEntry(node);
+        case 0x6F: return ReduceObjectExprA(node);
+        case 0x70: return ReduceObjectExprB(node);
+        case 0x71: return ReduceArrayInitA(node);
+        case 0x72: return ReduceArrayInitB(node);
+        case 0x73: return ReduceDictionaryInitA(node);
+        case 0x74: return ReduceDictionaryInitB(node);
+        case 0x75: return ReduceDictionaryEntry(node);
     default:
         printf("Unknown production %i.\n", node->production);
         return 1;

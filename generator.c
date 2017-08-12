@@ -394,6 +394,42 @@ void SaveJSTables(FILE* file, GRAMMAR_TABLE grammar, LR_TABLE parser)
 
     fprintf(file, 
         "],\n"
+        "  recursiveRules: ["
+    );
+
+    count = 0;
+    for (int i = 0; i < grammar.numRules; i++) {
+        if (grammar.rules[i].compressable) {
+            if (count) {
+                fprintf(file, ",");
+            }
+            fprintf(file, "%i", i);
+            count++;
+        }
+    }
+
+
+    fprintf(file, 
+        "],\n"
+        "  trivialRules: ["
+    );
+
+    count = 0;
+    for (int i = 1; i < grammar.numRules; i++) {
+        if (grammar.rules[i].rhsLength == 1 &&
+            grammar.rules[i].rhs[0] & K_SYMBOL) 
+        {
+            if (count) {
+                fprintf(file, ",");
+            }
+            fprintf(file, "%i", i);
+            count++;
+        }
+    }
+
+
+    fprintf(file, 
+        "],\n"
         "  numRules: %i\n};\n",
         grammar.numRules
     );

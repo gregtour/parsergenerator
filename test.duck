@@ -271,15 +271,19 @@ else
 print('x is not a number')
 endif
 
+array = [1, 2, 3]
+obj = [a: 1, b: 2, c: 3]
+
+array = [[a: 1, b: 2], [a: 2, b: 1]]
+
+obj = [a: [1, 2, 3], b: [1, 2, 3]]
+
+
+/*
 // objects and arrays
 myArray = [1, 2, 3, 4, 5]
 myObject = [a: 2, b: 3, c: 4]
-myMultilineObject = [
-a: 2,
-b: 3,
-c: 4,
-d: [1, 2, 3]
-]
+myMultilineObject = [a: 2, b: 3, c: 4, d: [1, 2, 3]]
 myNestedObject = [
 [
 value: 2,
@@ -301,8 +305,10 @@ type: "string"
 object = [
 name: "bob",
 type: "sprite"
-/* the end -
-or is it */ ]
+]
+
+*/
+
 endfunc
 endmodule
 

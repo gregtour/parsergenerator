@@ -83,6 +83,7 @@ typedef struct RULE
     int  lhs;
     int  rhsLength;
     int* rhs;
+    int  compressable;
 } RULE;
 
 typedef struct GRAMMAR_TABLE

@@ -281,6 +281,7 @@ int LoadGrammar(const char*    file,
     table->rules[0].rhs[0] = gSymbolGoal;
     table->rules[0].rhs[1] = 0;
     table->rules[0].rhsLength = 1;
+    table->rules[0].compressable = 0;
 
     // parse rules
     start = 0; end = 0; line = 0;
@@ -388,11 +389,18 @@ int LoadGrammar(const char*    file,
         }
         table->rules[r].rhs[rhs] = 0;
         table->rules[r].rhsLength = rhs;
+        table->rules[r].compressable = 0;
         if (rhs == 0) {
             printf("Rule %i on line %i has no right hand side.\n", r, line);
             return 1;
-        } else if (rhs == RULE_RHS_SIZE) {
-            printf("Rule %i on line %i may be too long.\n", r, line);
+        } else { 
+            if (table->rules[r].lhs == table->rules[r].rhs[rhs-1]) {
+                table->rules[r].compressable = 1;
+            }
+
+            if (rhs == RULE_RHS_SIZE) {
+                printf("Rule %i on line %i may be too long.\n", r, line);
+            }
         }
     }
 

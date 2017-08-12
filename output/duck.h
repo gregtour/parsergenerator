@@ -50,7 +50,8 @@ int ProcessNode(SYNTAX_TREE* node);
 #define SYMBOL_PRIMITIVE                  0x1027
 #define SYMBOL_ARRAY_INIT                 0x1028
 #define SYMBOL_DICTIONARY_INIT            0x1029
-#define SYMBOL_DICTIONARY_ENTRY           0x102A
+#define SYMBOL_OBJECT_EXPR                0x102A
+#define SYMBOL_DICTIONARY_ENTRY           0x102B
 
 
 /* production constants */
@@ -164,15 +165,17 @@ int ProcessNode(SYNTAX_TREE* node);
 #define PROD_OBJECT_A                               0x006C
 #define PROD_OBJECT_B                               0x006D
 #define PROD_OBJECT_C                               0x006E
-#define PROD_ARRAY_INIT_EXPR_A                      0x006F
-#define PROD_ARRAY_INIT_EXPR_B                      0x0070
-#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_A     0x0071
-#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_B     0x0072
-#define PROD_DICTIONARY_ENTRY_IDENTIFIER            0x0073
+#define PROD_OBJECT_EXPR_OBJECT                     0x006F
+#define PROD_OBJECT_EXPR_EXPR                       0x0070
+#define PROD_ARRAY_INIT_OBJECT_EXPR_A               0x0071
+#define PROD_ARRAY_INIT_OBJECT_EXPR_B               0x0072
+#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_A     0x0073
+#define PROD_DICTIONARY_INIT_DICTIONARY_ENTRY_B     0x0074
+#define PROD_DICTIONARY_ENTRY_IDENTIFIER            0x0075
 
 
 /* Grammar Symbols */
-extern char GRAMMAR_SYMBOLS[484];
+extern char GRAMMAR_SYMBOLS[498];
 
 /* Grammar Tokens */
 extern char GRAMMAR_TOKENS[324];
@@ -183,11 +186,11 @@ extern GRAMMAR_TABLE CONTEXT_FREE_GRAMMAR;
 
 
 /* SLR GOTO table */
-extern int GOTO_TABLE[11088];
+extern int GOTO_TABLE[11438];
 
 
 /* SLR ACTION table */
-extern ACTION ACTION_TABLE[18216];
+extern ACTION ACTION_TABLE[18354];
 
 
 /* SLR parse table struct */
